@@ -24,8 +24,8 @@ function getItem(label, key, icon, children, type) {
 // nav frame
 const items = [
     getItem('首页', '1', <PieChartOutlined />),
-    getItem('命名空间', '3', <ContainerOutlined />),
-    getItem('FaaS', '2', <DesktopOutlined />),
+    getItem('命名空间', '2', <ContainerOutlined />),
+    getItem('FaaS', '3', <DesktopOutlined />),
 ];
 
 // main compo

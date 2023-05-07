@@ -1,3 +1,3 @@
 function func(){
-    return "lisiwensg"
+    return "Hello FaaS!"
 };func()

@@ -5,7 +5,7 @@ var { writeDataToNewFileSync } = require('../utils/file.js')
 var genCryptoRandomString = require('../utils/rand.js')
 
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' })
+  res.end('Welcome Express :)');
 });
 
 router.post('/addfunc', (req, res, next) => {
@@ -54,7 +54,7 @@ router.get('/funclist', function (req, res, next) {
 
 router.get('/funclist/:namespaceid', function (req, res, next) {
   var params = req.params;
-  res.render('tips', { title: 'Express', text: `这是ID为${params.namespaceid}的函数页` });
+  res.send(`这是ID为${params.namespaceid}的函数页`);
 });
 
 module.exports = router;
