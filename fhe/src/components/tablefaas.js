@@ -1,14 +1,12 @@
 import { Space, Table, Tag } from 'antd';
 import instance from '../utils/axios';
 import { useState, useEffect } from 'react';
+import store from '../utils/redux'
 
 const TableFaas = () => {
     const [data, setData] = useState([]);
     useEffect(() => {
-        instance.get('/funclist')
-            .then((res) => setData(res.data))
-            .catch((err) => console.log(err));
-
+        setData(store.getState().functionState);
     }, [])
     const columns = [
         {
