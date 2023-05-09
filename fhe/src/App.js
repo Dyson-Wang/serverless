@@ -33,14 +33,23 @@ const App = () => {
       <TopMenu handleMenuOnClickFunction={handleMenuOnClickFunction} />
       <div style={{
         backgroundColor: '#d8e3e3',
-        // height: '100vh',
+        height: '1200px',
         width: '100vw',
-        display: 'grid',
-        justifyItems: 'center',
-        alignItems: 'center'
+        display: 'flex',
+        flexDirection: 'column',
+        // justifyContent:'center',
+        // alignItems:'center'
+        // justifyItems: 'center',
+        // alignItems: 'center'
       }}>
 
-        {menuKey == '1' ? <Main /> : menuKey == '2' ? <NamespacePage username={'fffff'} /> : <FuncPage username={'fffff'} />}
+        {
+          menuKey == '1' ?
+            <Main /> :
+            menuKey == '2' ?
+              <NamespacePage username={'fffff'} /> :
+              <FuncPage username={'fffff'} />
+        }
 
       </div>
     </div>

@@ -26,7 +26,7 @@ const NamespaceTable = () => {
             dataIndex: 'createtime'
         }
     ];
-    return <Table columns={columns} dataSource={data} style={{ height: '30vh', width: '70vw' }} />
+    return <Table columns={columns} dataSource={data} style={{ height: '30vh', width: '70vw', marginLeft: 'auto', marginRight: 'auto' }} />
 }
 
 export default NamespaceTable;
