@@ -1,7 +1,7 @@
 import { Space, Table, Tag } from 'antd';
-import instance from '../utils/axios';
+import instance from '../../utils/axios';
 import { useState, useEffect } from 'react';
-import store from '../utils/redux'
+import store from '../../utils/redux'
 
 const TableFaas = () => {
     const [data, setData] = useState([]);
@@ -11,13 +11,13 @@ const TableFaas = () => {
     const columns = [
         {
             title: '函数名称',
-            dataIndex: 'faasName',
+            dataIndex: 'faasname',
             key: 'name',
             render: (text) => <a>{text}</a>,
         },
         {
             title: '调用次数',
-            dataIndex: 'invokeTimes',
+            dataIndex: 'invoketimes',
             key: 'times',
         },
         {
@@ -33,7 +33,7 @@ const TableFaas = () => {
         {
             title: '创建时间',
             key: 'time',
-            dataIndex: 'createTime'
+            dataIndex: 'createtime'
         },
         {
             title: 'Action',

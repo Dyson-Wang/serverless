@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Button, Modal, Card, Form, Checkbox, Input, Radio, Space } from 'antd';
-import NamespaceTable from '../components/namespacetable';
-import instance from '../utils/axios';
-import DbCom from '../components/dbcom'
+import NamespaceTable from './namespacetable';
+import instance, { postUserNamespace } from '../../utils/axios';
+import DbCom from './dbcom'
+import store from '../../utils/redux';
 
 const NamespacePage = ({ username }) => {
     const [open, setOpen] = useState(false);
     const [fields, setFields] = useState([])
+    const { browserid, browsertoken } = store.getState()
+
     const onFinish = (values) => {
-        // instance.post('/addfunc', values)
-        //     .then((res) => console.log(res))
-        //     .catch((err) => console.log(err))
-        console.log('Success:', values);
+        postUserNamespace(values.namespace).then(res => console.log(res));
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
@@ -50,12 +50,16 @@ const NamespacePage = ({ username }) => {
                         }}
                         style={{
                             maxWidth: 600,
+                            display: 'block'
                         }}
                         onFinish={onFinish}
                         onFinishFailed={onFinishFailed}
                         autoComplete="off"
+                        initialValues={{
+                            owner: browserid
+                        }}
                     >
-                        <Form.Item label="User" name="owner" initialValue={username} >
+                        <Form.Item label="User" name="owner" >
                             <Input disabled={true} />
                         </Form.Item>
 
@@ -64,7 +68,7 @@ const NamespacePage = ({ username }) => {
                         </Form.Item>
 
 
-                        <Form.Item style={{marginLeft: 'auto',marginRight: '10px' }}>
+                        <Form.Item style={{ marginLeft: '50%', marginRight: 'auto' }}>
                             <DbCom />
                         </Form.Item>
                         <Form.Item wrapperCol={{ offset: 10 }}>

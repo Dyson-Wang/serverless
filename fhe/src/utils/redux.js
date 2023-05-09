@@ -1,11 +1,13 @@
 import { createStore } from 'redux'
 
-function counterReducer(state = {  }, action) {
+function counterReducer(state = {}, action) {
   switch (action.type) {
     case 'setNewNamespaceStatus':
-      return { namespaceState: action.value, ...state }
+      return { ...state, namespaceState: action.value, }
     case 'setNewFunctionStatus':
-      return { functionState: action.value, ...state }
+      return { ...state, functionState: action.value, }
+    case 'setBrowserTokenAndId':
+      return { browsertoken: action.value.browsertoken, browserid: action.value.browserid, ...state }
     default:
       return state
   }

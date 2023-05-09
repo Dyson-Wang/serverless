@@ -1,15 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Button, Modal, Card, Form, Checkbox, Input, Radio, Select, InputNumber, Space, Divider } from 'antd';
-import instance from '../utils/axios';
-import TableFaas from '../components/tablefaas';
-import store from '../utils/redux';
+import { RedoOutlined } from '@ant-design/icons'
+import instance from '../../utils/axios';
+import TableFaas from './tablefaas';
+import store from '../../utils/redux';
 import { Editor } from '@monaco-editor/react';
 
-
-
-const FuncPage = ({ username }) => {
+const FuncPage = () => {
     const [open, setOpen] = useState(false);
     const [form] = Form.useForm();
+
+    const { browsertoken, browserid } = store.getState();
+
     useEffect(() => {
         if (open == true) instance.get('/randomfuncname').then((res) => {
             form.setFieldsValue({
@@ -27,23 +29,28 @@ const FuncPage = ({ username }) => {
     }
 
     let handleOnClick = (e) => {
-        instance.post('/addfunc', {
-            namespace: 'test',
-            code: editorRef.current.getValue()
-        }).then(function (res) {
-            console.log(res)
-        }).catch((err) => {
-            console.log(err);
-        })
+        instance.get('/funclist', {
+            headers: {
+                Authorization: browsertoken
+            }
+        }).then((res) => {
+            res.data.map((e, i) => {
+                Object.defineProperty(e, 'key', {
+                    value: i
+                })
+            })
+            // console.log(res.data)
+            store.dispatch({ type: 'setNewFunctionStatus', value: res.data });
+        }).catch(err => console.log(err))
     }
 
 
     const onFinish = (values) => {
-        // instance.post('/namespace', values)
-        //     .then((res) => console.log(res))
-        //     .catch((err) => console.log(err))
-        console.log(editorRef.current.getValue());
-        console.log('Success:', values);
+        var data = { code: editorRef.current.getValue(), ...values }
+        instance.post('/addfunc', data, { headers: { Authorization: browsertoken } })
+            .then((res) => console.log(res))
+            .catch((err) => console.log(err))
+        console.log('Success:', data);
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
@@ -56,11 +63,19 @@ const FuncPage = ({ username }) => {
                     display: 'flex',
                     marginTop: 100,
                     marginBottom: 50
-                }}><Button type='primary' onClick={() => setOpen(true)} style={{
-                    width: 150,
-                    marginLeft: 'auto',
-                    marginRight: '15vw',
-                }}>新建函数</Button></div>
+                }}>
+                    <Button onClick={handleOnClick} style={{
+                        marginLeft: 'auto',
+                        marginRight: '10px'
+                    }}>
+                        <RedoOutlined />
+                    </Button>
+                    <Button type='primary' onClick={() => setOpen(true)} style={{
+                        // width: 150,
+                        marginLeft: '0',
+                        marginRight: '15vw',
+                    }}>新建函数</Button>
+                </div>
                 <TableFaas />
             </>
             :
@@ -75,6 +90,10 @@ const FuncPage = ({ username }) => {
                         }}
                         style={{
                             // display: 'flex'
+                        }}
+                        initialValues={{
+                            maxruntime: 10,
+                            method: 'GET'
                         }}
                         onFinish={onFinish}
                         onFinishFailed={onFinishFailed}
@@ -115,14 +134,13 @@ const FuncPage = ({ username }) => {
 
                                 <Form.Item label="Method" name="method" rules={[{ required: true }]}>
                                     <Radio.Group>
-                                        <Radio value="GET"> GET </Radio>
+                                        <Radio value="GET" defaultChecked> GET </Radio>
                                         <Radio value="POST"> POST </Radio>
                                     </Radio.Group>
                                 </Form.Item>
 
-                                <Form.Item label="InputNumber" name={'runtime'}>
+                                <Form.Item label="maxruntime" name="maxruntime">
                                     <InputNumber
-                                        defaultValue={0}
                                         min={0}
                                         max={15000}
                                         addonAfter={'ms'}
@@ -206,7 +224,7 @@ const FuncPage = ({ username }) => {
                                 width="800px"
                                 defaultLanguage='javascript'
                                 defaultValue={`function func(){
-    "code here."
+    return "express"
 };
 func();`}
                                 onMount={handleEditorDidMount}

@@ -1,8 +1,8 @@
 import { Space, Table, Tag } from 'antd';
-import instance from '../utils/axios';
+import instance from '../../utils/axios';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
-import store from '../utils/redux'
+import store from '../../utils/redux'
 
 const NamespaceTable = () => {
     const [data, setData] = useState([]);
