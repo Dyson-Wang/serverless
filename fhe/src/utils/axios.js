@@ -1,13 +1,34 @@
 import axios from "axios";
 import fingerprintjs from '@fingerprintjs/fingerprintjs'
 
-const browserid = window.localStorage.getItem('browserid');
 const browsertoken = window.localStorage.getItem('browsertoken');
 
 const instance = axios.create({
     baseURL: 'http://127.0.0.1:3000',
     timeout: 1000,
 })
+
+export const login = async () => {
+    try {
+        const { visitorId } = await fingerprintjs.load().then(fp => fp.get())
+        const res = await instance.post('/login', {
+            browserid: visitorId
+        })
+        return { browserid: visitorId, browsertoken: res.data.token };
+    } catch (err) {
+        return console.log(err);
+    }
+};
+
+export const getRandomFuncName = async () => {
+    try {
+        const res = await instance.get('/randomfuncname')
+        return res.data;
+    } catch (error) {
+        console.log(error)
+    }
+
+}
 
 export const getUserNamespace = async () => {
     try {
@@ -58,17 +79,18 @@ export const getUserFunction = async () => {
     }
 };
 
-export const login = async () => {
+export const postUserFunction = async (data) => {
     try {
-        const { visitorId } = await fingerprintjs.load().then(fp => fp.get())
-        const res = await instance.post('/login', {
-            browserid: visitorId
+
+        const res = await instance.post('/addfunc', data, {
+            headers: {
+                Authorization: browsertoken
+            }
         })
-        return { browserid: visitorId, browsertoken: res.data.token };
+        return res.data;
     } catch (err) {
         return console.log(err);
     }
 };
-
 
 export default instance;

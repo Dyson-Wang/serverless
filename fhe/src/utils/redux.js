@@ -7,7 +7,7 @@ function counterReducer(state = {}, action) {
     case 'setNewFunctionStatus':
       return { ...state, functionState: action.value, }
     case 'setBrowserTokenAndId':
-      return { browsertoken: action.value.browsertoken, browserid: action.value.browserid, ...state }
+      return { ...state, browsertoken: action.value.browsertoken, browserid: action.value.browserid }
     default:
       return state
   }

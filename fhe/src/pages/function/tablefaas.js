@@ -1,13 +1,12 @@
-import { Space, Table, Tag } from 'antd';
-import instance from '../../utils/axios';
-import { useState, useEffect } from 'react';
-import store from '../../utils/redux'
+import { Button, Space, Table } from 'antd';
+import { RedoOutlined } from '@ant-design/icons'
+import { useSelector, useDispatch } from 'react-redux';
 
-const TableFaas = () => {
-    const [data, setData] = useState([]);
-    useEffect(() => {
-        setData(store.getState().functionState);
-    }, [])
+import { getUserFunction } from '../../utils/axios';
+
+const TableFaas = ({ setOpen }) => {
+    const dispatch = useDispatch()
+    const data = useSelector(state => state.functionState);
     const columns = [
         {
             title: '函数名称',
@@ -46,7 +45,34 @@ const TableFaas = () => {
             ),
         },
     ];
-    return <Table columns={columns} dataSource={data} style={{ height: '30vh', width: '70vw',marginLeft: 'auto', marginRight: 'auto' }} />
+    return <>
+        <div style={{
+            display: 'flex',
+            marginTop: 100,
+            marginBottom: 50
+        }}>
+            <Button
+                onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
+                style={{
+                    marginLeft: 'auto',
+                    marginRight: '10px'
+                }}
+            >
+                <RedoOutlined />
+            </Button>
+            <Button type='primary' onClick={() => setOpen(true)} style={{
+                // width: 150,
+                marginLeft: '0',
+                marginRight: '15vw',
+            }}>新建函数</Button>
+        </div>
+        <Table
+            columns={columns}
+            dataSource={data}
+            style={{
+                height: '30vh', width: '70vw', marginLeft: 'auto', marginRight: 'auto'
+            }} />
+    </>
 }
 
 export default TableFaas;

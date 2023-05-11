@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Checkbox, Form, Input, Modal, Radio } from 'antd';
+import { Button, Form, Input, Modal, Radio } from 'antd';
 import { CheckCircleTwoTone } from '@ant-design/icons'
 
 const onFinish = (values) => {

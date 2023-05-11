@@ -30,25 +30,12 @@ const items = [
 
 // main compo
 const TopMenu = ({ handleMenuOnClickFunction }) => {
-    // const [collapsed, setCollapsed] = useState(false);
-    // const toggleCollapsed = () => {
-    //     setCollapsed(!collapsed);
-    // };
     return (
         <div
             style={{
                 width: '100vw',
             }}
         >
-            {/* <Button
-                type="primary"
-                onClick={toggleCollapsed}
-                style={{
-                    marginBottom: 16,
-                }}
-            >
-                {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            </Button> */}
             <Menu
                 defaultSelectedKeys={['1']}
                 // defaultOpenKeys={['sub1']}

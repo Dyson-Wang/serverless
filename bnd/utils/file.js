@@ -6,7 +6,7 @@ const writeDataToNewFileSync = (data, fileName, config) => {
     writeFileSync(`./src/faas/${fileName}/func.js`, data, {
         encoding: 'utf8'
     });
-    writeFileSync(`./src/faas/${fileName}/config.js`, JSON.stringify(config), {
+    writeFileSync(`./src/faas/${fileName}/config.json`, JSON.stringify(config), {
         encoding: 'utf8'
     })
 }

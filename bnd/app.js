@@ -42,11 +42,11 @@ app.use((req, res, next) => {
       ignoreExpiration: true,
       algorithms: 'HS256'
     })
+    next();
   }
   catch (err) {
     console.log(err)
   }
-  next();
 })
 
 app.use('/', indexRouter);
