@@ -1,14 +1,27 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Button, Card, Form, Input, Space } from 'antd';
-
+import { Button, Card, Form, Input, Space, message } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import { postUserNamespace } from '../../utils/axios';
 import DbCom from './dbconfig';
 
-const NewNamespace = ({ setOpen }) => {
+const NewNamespace = () => {
+    const [btnState, SetBtnState] = useState(false);
+    const navigate = useNavigate()
     const browserid = useSelector(state => state.browserid);
 
+    const [messageApi, contextHolder] = message.useMessage();
+
     const onFinish = (values) => {
-        postUserNamespace(values.namespace).then(res => console.log(res));
+        postUserNamespace(values.namespace).then(res => {
+            messageApi.info({
+                content: 'ok',
+                icon: <CheckCircleFilled style={{ color: 'green' }} />,
+            });
+            SetBtnState(true)
+            console.log(res)
+        });
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
@@ -23,6 +36,7 @@ const NewNamespace = ({ setOpen }) => {
             marginRight: 'auto',
             // marginTop: 50
         }}>
+        {contextHolder}
         <Form
             name="basic"
             labelCol={{
@@ -56,10 +70,10 @@ const NewNamespace = ({ setOpen }) => {
 
             <Form.Item wrapperCol={{ offset: 10 }}>
                 <Space>
-                    <Button type="primary" htmlType="submit">
+                    <Button type="primary" htmlType="submit" disabled={btnState}>
                         创建
                     </Button>
-                    <Button type="default" onClick={() => setOpen(false)}>
+                    <Button type="default" onClick={() => navigate('/namespace')}>
                         返回
                     </Button>
                 </Space>

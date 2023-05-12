@@ -1,9 +1,11 @@
 import { Button, Table } from 'antd';
 import { RedoOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, Link } from 'react-router-dom'
 import { getUserNamespace } from '../../utils/axios';
 
-const NamespaceTable = ({ setOpen }) => {
+const NamespaceTable = () => {
+    const navigate = useNavigate()
     const dispatch = useDispatch();
     const data = useSelector(state => state.namespaceState);
     const columns = [
@@ -11,6 +13,8 @@ const NamespaceTable = ({ setOpen }) => {
             title: '命名空间',
             dataIndex: 'namespace',
             key: 'ns',
+            render: (text) => <Link to={`/namespace/${text}`}>{text}</Link>,
+
         },
         {
             title: '创建者',
@@ -41,7 +45,7 @@ const NamespaceTable = ({ setOpen }) => {
             >
                 <RedoOutlined />
             </Button>
-            <Button type='primary' onClick={() => setOpen(true)} style={{
+            <Button type='primary' onClick={() => navigate('/namespace/new')} style={{
                 width: 150,
             }}>新建命名空间</Button>
         </div>
@@ -54,7 +58,9 @@ const NamespaceTable = ({ setOpen }) => {
                 width: '70vw',
                 marginLeft: 'auto',
                 marginRight: 'auto'
-            }} />
+            }}
+            pagination={{ pageSize: 10 }}
+        />
     </>
 }
 

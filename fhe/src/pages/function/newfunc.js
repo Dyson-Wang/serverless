@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import {useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import {
     Button,
@@ -9,15 +10,22 @@ import {
     Select,
     InputNumber,
     Space,
-    Divider
+    Divider,
+    notification,
+    message,
+    Alert
 } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons'
 import { Editor } from '@monaco-editor/react';
 import { getRandomFuncName, postUserFunction } from '../../utils/axios'
 
-const NewFunc = ({ setOpen }) => {
-    const [form] = Form.useForm();
+const NewFunc = () => {
+    const [btnState, SetBtnState] = useState(false);
     const editorRef = useRef(null);
     const namespaceState = useSelector(state => state.namespaceState);
+    const navigate = useNavigate()
+    const [form] = Form.useForm();
+    const [messageApi, contextHolder] = message.useMessage();
 
     getRandomFuncName().then(data => form.setFieldsValue({
         maxruntime: 10,
@@ -26,12 +34,21 @@ const NewFunc = ({ setOpen }) => {
     }))
     const onFinish = (values) => {
         var data = { code: editorRef.current.getValue(), ...values }
-        postUserFunction(data).then(data => console.log(data))
+
+        postUserFunction(data).then(data => {
+            console.log(data)
+            messageApi.info({
+                content: 'ok',
+                icon: <CheckCircleFilled style={{ color: 'green' }} />,
+            });
+            SetBtnState(true)
+        })
         console.log('Success:', data);
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
     return (
         <Card
             title="add function"
@@ -41,6 +58,7 @@ const NewFunc = ({ setOpen }) => {
             bordered={true}
             headStyle={{ textAlign: 'center' }}
         >
+            {contextHolder}
             <Form
                 form={form}
                 name="basic"
@@ -131,10 +149,10 @@ const NewFunc = ({ setOpen }) => {
 
                 <Form.Item wrapperCol={{ offset: 10, span: 18 }}>
                     <Space>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" disabled={btnState}>
                             创建
                         </Button>
-                        <Button type="default" onClick={() => setOpen(false)}>
+                        <Button type="default" onClick={() => navigate('/function')}>
                             返回
                         </Button>
                     </Space>

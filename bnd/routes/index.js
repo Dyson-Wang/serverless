@@ -13,7 +13,6 @@ router.get('/', function (req, res, next) {
 
 // jwt
 router.post('/login', function (req, res, next) {
-  // console.log(req.body)
   let token = jwt.sign({
     browserid: req.body.browserid
   }, 'expresswithserverless', {
@@ -26,6 +25,23 @@ router.post('/login', function (req, res, next) {
 router.get('/randomfuncname', (req, res, next) => {
   res.end(genCryptoRandomString(16))
 })
+
+// 所有函数列表
+router.get('/funclist', function (req, res, next) {
+  req.app.locals.pool.getConnection((err, connection) => {
+    if (err) console.log(err);
+    connection.query(`SELECT * FROM faasInfo`, (error, results, fields) => {
+      for (let i = 0; i < results.length; i++) {
+        results[i].createtime = results[i].createtime.toLocaleString()
+      }
+      connection.release();
+      if (error) {
+        console.log(error)
+      }
+      res.send(results);
+    })
+  })
+});
 
 // 添加函数 POST
 router.post('/addfunc', (req, res, next) => {
@@ -61,25 +77,19 @@ router.post('/addfunc', (req, res, next) => {
   })
 })
 
-// 所有函数列表
-router.get('/funclist', function (req, res, next) {
-  var data = null;
-  req.app.locals.pool.getConnection((err, connection) => {
-    if (err) console.log(err);
-    connection.query(`SELECT * FROM faasInfo`, (error, results, fields) => {
-      data = results;
-      connection.release();
-      if (error) {
-        console.log(error)
-      }
-      res.send(data);
-    })
-  })
-});
-
-// 根据命名空间请求
-router.get('/funclist/:namespaceid', function (req, res, next) {
-  res.send(`这是ID为${req.params.namespaceid}的函数页`);
+// 获取函数详情
+router.get('/config/:id', function (req, res, next) {
+  // req.app.locals.pool.getConnection((err, connection) => {
+  //   if (err) throw err;
+  //   connection.query(`SELECT * FROM namespace WHERE owner LIKE '${req.app.locals.decoded.browserid}'`, (error, results, fields) => {
+  //     for (let i = 0; i < results.length; i++) {
+  //       results[i].createtime = results[i].createtime.toLocaleString()
+  //     }
+  //     res.send(results);
+  //     connection.release();
+  //     if (error) console.log(error);
+  //   })
+  // })
 });
 
 // 请求命名空间
@@ -87,6 +97,9 @@ router.get('/namespace', function (req, res, next) {
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) throw err;
     connection.query(`SELECT * FROM namespace WHERE owner LIKE '${req.app.locals.decoded.browserid}'`, (error, results, fields) => {
+      for (let i = 0; i < results.length; i++) {
+        results[i].createtime = results[i].createtime.toLocaleString()
+      }
       res.send(results);
       connection.release();
       if (error) console.log(error);

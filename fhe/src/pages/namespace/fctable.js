@@ -4,11 +4,11 @@ import { Button, Space, Table } from 'antd';
 import { RedoOutlined } from '@ant-design/icons';
 
 import { getUserFunction } from '../../utils/axios';
+import DbCom from './dbconfig'
 
-const TableFaas = () => {
+const FCTable = ({data}) => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const data = useSelector(state => state.functionState);
 
     const columns = [
         {
@@ -56,6 +56,7 @@ const TableFaas = () => {
             marginRight: 'auto',
             marginBottom: 20
         }}>
+            <DbCom />
             <Button
                 onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
                 style={{
@@ -83,4 +84,4 @@ const TableFaas = () => {
 
 }
 
-export default TableFaas;
+export default FCTable;

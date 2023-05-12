@@ -93,4 +93,22 @@ export const postUserFunction = async (data) => {
     }
 };
 
+export const getNamespaceFunction = async (namespace) => {
+    try {
+        const res = await instance.get(`/namespace/${namespace}`, {
+            headers: {
+                Authorization: browsertoken
+            }
+        });
+        res.data.map((e, i) => {
+            Object.defineProperty(e, 'key', {
+                value: i
+            });
+        });
+        return res.data;
+    } catch (err) {
+        return console.log(err);
+    }
+};
+
 export default instance;
