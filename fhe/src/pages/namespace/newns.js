@@ -15,12 +15,13 @@ const NewNamespace = ({ setOpen }) => {
     };
     return <Card
         title="namespace"
+        bordered={false}
         style={{
             width: 600,
             height: 400,
             marginLeft: 'auto',
             marginRight: 'auto',
-            marginTop: 50
+            // marginTop: 50
         }}>
         <Form
             name="basic"

@@ -48,8 +48,10 @@ const TableFaas = ({ setOpen }) => {
     return <>
         <div style={{
             display: 'flex',
-            marginTop: 100,
-            marginBottom: 50
+            width: '70vw',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            marginBottom: 20
         }}>
             <Button
                 onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
@@ -61,14 +63,13 @@ const TableFaas = ({ setOpen }) => {
                 <RedoOutlined />
             </Button>
             <Button type='primary' onClick={() => setOpen(true)} style={{
-                // width: 150,
                 marginLeft: '0',
-                marginRight: '15vw',
             }}>新建函数</Button>
         </div>
         <Table
             columns={columns}
             dataSource={data}
+            bordered={true}
             style={{
                 height: '30vh', width: '70vw', marginLeft: 'auto', marginRight: 'auto'
             }} />

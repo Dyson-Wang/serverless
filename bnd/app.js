@@ -35,7 +35,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  var ignorePath = ['/', '/login', '/randomfuncname']
+  var ignorePath = ['/', '/login', '/randomfuncname', '/favicon.ico']
   if (ignorePath.includes(req.path)) return next()
   try {
     req.app.locals.decoded = jwt.verify(req.headers.authorization, 'expresswithserverless', {

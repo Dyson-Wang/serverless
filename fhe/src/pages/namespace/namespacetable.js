@@ -26,8 +26,11 @@ const NamespaceTable = ({ setOpen }) => {
     return <>
         <div style={{
             display: 'flex',
-            marginTop: 100,
-            marginBottom: 50
+            width: '70vw',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            // marginTop: 100,
+            marginBottom: 20
         }}>
             <Button
                 onClick={(e) => getUserNamespace().then(data => dispatch({ type: 'setNewNamespaceStatus', value: data }))}
@@ -40,14 +43,14 @@ const NamespaceTable = ({ setOpen }) => {
             </Button>
             <Button type='primary' onClick={() => setOpen(true)} style={{
                 width: 150,
-                marginRight: '15vw'
             }}>新建命名空间</Button>
         </div>
         <Table
             columns={columns}
             dataSource={data}
+            bordered={true}
             style={{
-                height: '30vh',
+                // height: '30vh',
                 width: '70vw',
                 marginLeft: 'auto',
                 marginRight: 'auto'

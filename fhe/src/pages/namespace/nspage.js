@@ -4,8 +4,8 @@ import NewNamespace from './newns';
 
 const NamespacePage = () => {
     const [open, setOpen] = useState(false);
-
-    return open == false ? <NamespaceTable setOpen={(v) => setOpen(v)} /> : <NewNamespace setOpen={(v) => setOpen(v)} />
+    const setof = (v) => setOpen(v);
+    return open == false ? <NamespaceTable setOpen={setof} /> : <NewNamespace setOpen={setof} />
 }
 
 export default NamespacePage;

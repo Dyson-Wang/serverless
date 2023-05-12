@@ -38,6 +38,7 @@ const NewFunc = ({ setOpen }) => {
             style={{
                 width: 1000, marginTop: 50, marginLeft: 'auto', marginRight: 'auto'
             }}
+            bordered={true}
             headStyle={{ textAlign: 'center' }}
         >
             <Form

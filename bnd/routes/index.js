@@ -4,10 +4,11 @@ var vmFunc = require('../utils/vm.js')
 var { writeDataToNewFileSync } = require('../utils/file.js')
 var genCryptoRandomString = require('../utils/rand.js')
 var jwt = require('jsonwebtoken')
+var child_process = require('child_process');
 
 // 根
 router.get('/', function (req, res, next) {
-  res.end('Welcome Express :)');
+  res.send('Welcome Express :)');
 });
 
 // jwt
@@ -31,7 +32,20 @@ router.post('/addfunc', (req, res, next) => {
   const { funcname, namespace, method, maxruntime, code, comments, scanobj } = req.body;
   const { browserid } = req.app.locals.decoded
 
+  // fs
   writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
+  
+  // ESLint
+  try {
+    var stdout = child_process.execSync(`eslint ./src/faas/${funcname}/func.js`);
+    console.log(stdout.toLocaleString())
+  } catch (error) {
+    console.log(error.stdout.toLocaleString())
+  }
+
+  // scan obj
+  console.log(vmFunc(code, scanobj))
+
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) throw err;
     let date = new Date();
