@@ -32,7 +32,6 @@ const App = () => {
 
 
   const [bsert, setBsert] = useState({ browserid, browsertoken });
-  const [menuKey, setMenuKey] = useState('1');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -136,7 +135,7 @@ const App = () => {
           }}
         >
           <div style={{
-            height: '100vh',
+            height: '120vh',
             // width: '100vw',
             display: 'flex',
             flexDirection: 'column'

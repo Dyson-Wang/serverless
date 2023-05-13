@@ -5,6 +5,7 @@ var { writeDataToNewFileSync, readFileSyncToData, writeDataToFileSync } = requir
 var genCryptoRandomString = require('../utils/rand.js')
 var jwt = require('jsonwebtoken')
 var child_process = require('child_process');
+var dbcon = require('../utils/db.js')
 
 // 根
 router.get('/', function (req, res, next) {
@@ -188,5 +189,29 @@ router.post('/namespace', function (req, res, next) {
     })
   })
 });
+
+// db post test
+router.post('/dbtest', (req, res, next) => {
+  const { username, password, host, port, database, option } = req.body;
+  dbcon(host, username, password, port, database).connect((err) => {
+    if (err) {
+      res.status(200)
+      res.send({ message: 'fail' })
+      return
+    }
+    res.status(200)
+    res.send({ message: 'ok' })
+  });
+})
+
+// db modify
+/*
+新建命名空间的数据库配置 可选
+修改命名空间的数据库配置
+将eslint vm返回的错误 提示用户
+首页一些数据展示的api 命名空间数、函数、HTTP GET POST、总成功总失败、数据库连接次数 不需要token
+*/
+// 
+
 
 module.exports = router;

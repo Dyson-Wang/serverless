@@ -102,7 +102,7 @@ export const postUserFunction = async (data) => {
 // 删除函数
 export const delUserFunction = async (funcname, namespace) => {
     try {
-        const res = await instance.post(`/delfunc`,{
+        const res = await instance.post(`/delfunc`, {
             funcname, namespace
         }, {
             headers: {
@@ -147,5 +147,18 @@ export const postModUserFunctionConfig = async (data) => {
         return console.log(err);
     }
 };
+
+export const postTestUserDB = async (data) => {
+    try {
+        const res = await instance.post('/dbtest', data, {
+            headers: {
+                Authorization: browsertoken
+            }
+        })
+        return res.data;
+    } catch (err) {
+        return console.log(err)
+    }
+}
 
 export default instance;

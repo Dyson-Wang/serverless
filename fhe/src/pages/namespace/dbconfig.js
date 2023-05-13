@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Button, Form, Input, Modal, Radio } from 'antd';
-import { CheckCircleTwoTone } from '@ant-design/icons'
+import { Button, Form, Input, Modal, Radio, message } from 'antd';
+import { CheckCircleTwoTone, CloseCircleTwoTone, CloseCircleFilled } from '@ant-design/icons'
+import { postTestUserDB } from '../../utils/axios';
 
 const onFinish = (values) => {
   console.log('Success:', values);
@@ -13,20 +14,32 @@ const DbCom = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [hadSetDB, setHadSetDB] = useState(false);
   const [db, setDb] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+
   // const [initialValues, setInitialValues] = useState({username: null, password: null, port: 3306, option: 'old'});
-  const initialValues = { username: null, password: null, port: 3306, option: 'old' }
+  const initialValues = { host: null, username: null, password: null, port: 3306, database: null, option: 'mysql' }
   const showModal = () => {
     setDb(true);
   };
   const handleOk = () => {
-    console.log(form.getFieldsValue());
-    form.setFieldsValue(initialValues)
+    const data = form.getFieldsValue()
     setConfirmLoading(true);
-    setTimeout(() => {
-      setDb(false);
-      setConfirmLoading(false);
-      setHadSetDB(true);
-    }, 2000);
+    postTestUserDB(data).then((v) => {
+      if (v.message == 'ok') {
+        setDb(false);
+        setConfirmLoading(false);
+        setHadSetDB(true);
+        form.setFieldsValue(initialValues)
+      } else {
+        messageApi.info({
+          content: 'connection error',
+          icon: <CloseCircleFilled style={{ color: 'red' }} />,
+        });
+        console.log(v)
+        setConfirmLoading(false);
+      }
+    })
+
   };
   const handleCancel = () => {
     console.log('Clicked cancel button');
@@ -46,8 +59,10 @@ const DbCom = () => {
         onOk={handleOk}
         confirmLoading={confirmLoading}
         onCancel={handleCancel}
-
+        mask={false}
+        maskClosable={false}
       >
+        {contextHolder}
         <Form
           name="basic"
           form={form}
@@ -66,6 +81,18 @@ const DbCom = () => {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
+          <Form.Item
+            label="Host"
+            name="host"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your database!',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
           <Form.Item
             label="Username"
             name="username"
@@ -97,11 +124,22 @@ const DbCom = () => {
           >
             <Input />
           </Form.Item>
-
+          <Form.Item
+            label="Database"
+            name="database"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your database!',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
           <Form.Item label="Option" name="option" rules={[{ required: true }]}>
             <Radio.Group >
-              <Radio value="old"> 连接已存在的数据库 </Radio>
-              <Radio value="new" > 新建数据库 </Radio>
+              <Radio value="mysql"> mysql </Radio>
+              {/* <Radio value="new" > 新建数据库 </Radio> */}
             </Radio.Group>
           </Form.Item>
 

@@ -49,10 +49,6 @@ const FCForm = ({ props }) => {
             });
         })
         console.log('Success:', data);
-        messageApi.info({
-            content: 'ok',
-            icon: <CheckCircleFilled style={{ color: 'green' }} />,
-        });
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
