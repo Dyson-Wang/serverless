@@ -2,11 +2,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, Space, Table } from 'antd';
 import { RedoOutlined } from '@ant-design/icons';
-
+import DbCom from './dbconfig';
 import { getUserFunction } from '../../utils/axios';
-import DbCom from './dbconfig'
 
-const FCTable = ({data}) => {
+const FCTable = ({ data, db }) => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -42,10 +41,9 @@ const FCTable = ({data}) => {
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <a>详情</a>
-                    <a>删除</a>
+                    <Link to={`/function/${record.faasname}`}>详情</Link>
                 </Space>
-            ),
+            )
         },
     ];
     return <>
@@ -56,7 +54,7 @@ const FCTable = ({data}) => {
             marginRight: 'auto',
             marginBottom: 20
         }}>
-            <DbCom />
+            {db ? <DbCom /> : <></>}
             <Button
                 onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
                 style={{

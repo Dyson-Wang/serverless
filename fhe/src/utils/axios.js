@@ -8,6 +8,7 @@ const instance = axios.create({
     timeout: 1000,
 })
 
+// browsertoken
 export const login = async () => {
     try {
         const { visitorId } = await fingerprintjs.load().then(fp => fp.get())
@@ -20,6 +21,7 @@ export const login = async () => {
     }
 };
 
+// random
 export const getRandomFuncName = async () => {
     try {
         const res = await instance.get('/randomfuncname')
@@ -30,6 +32,7 @@ export const getRandomFuncName = async () => {
 
 }
 
+// namespace list
 export const getUserNamespace = async () => {
     try {
         const res = await instance.get('/namespace', {
@@ -48,6 +51,7 @@ export const getUserNamespace = async () => {
     }
 };
 
+// 创建namespace
 export const postUserNamespace = async (namespace) => {
     try {
         const res = await instance.post('/namespace', {
@@ -61,6 +65,7 @@ export const postUserNamespace = async (namespace) => {
     }
 };
 
+// function list
 export const getUserFunction = async () => {
     try {
         const res = await instance.get('/funclist', {
@@ -79,6 +84,7 @@ export const getUserFunction = async () => {
     }
 };
 
+// 创建function
 export const postUserFunction = async (data) => {
     try {
 
@@ -93,9 +99,26 @@ export const postUserFunction = async (data) => {
     }
 };
 
-export const getNamespaceFunction = async (namespace) => {
+// 删除函数
+export const delUserFunction = async (funcname, namespace) => {
     try {
-        const res = await instance.get(`/namespace/${namespace}`, {
+        const res = await instance.post(`/delfunc`,{
+            funcname, namespace
+        }, {
+            headers: {
+                Authorization: browsertoken
+            }
+        });
+        return res.data;
+    } catch (err) {
+        return console.log(err);
+    }
+};
+
+// 获取函数详情
+export const getUserFunctionConfig = async (funcname, namespace) => {
+    try {
+        const res = await instance.get(`/config/${namespace}/${funcname}`, {
             headers: {
                 Authorization: browsertoken
             }
@@ -105,6 +128,20 @@ export const getNamespaceFunction = async (namespace) => {
                 value: i
             });
         });
+        return res.data;
+    } catch (err) {
+        return console.log(err);
+    }
+};
+
+// 修改函数详情
+export const postModUserFunctionConfig = async (data) => {
+    try {
+        const res = await instance.post('/modfunc', data, {
+            headers: {
+                Authorization: browsertoken
+            }
+        })
         return res.data;
     } catch (err) {
         return console.log(err);
