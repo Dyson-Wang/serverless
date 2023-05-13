@@ -5,8 +5,9 @@ import DbCom from './dbconfig'
 
 const ChildNamespacePage = () => {
     const params = useParams()
-    const data = useSelector(state => state.functionState.map((ele, i) => {
-        if (ele.namespace == params.id) return ele;
+    // 浅拷贝
+    const data = useSelector(state => state.functionState.filter((ele, i) => {
+        if (ele.namespace == params.id) return true
     }));
 
     return <>

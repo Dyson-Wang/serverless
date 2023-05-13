@@ -11,14 +11,24 @@ const writeDataToNewFileSync = (data, fileName, config) => {
     })
 }
 
-const writeDataToFileSync = (filePath, data) => {
-    writeFileSync(filePath, data);
-}
-
-function readFileSyncToData(filePath) {
-    return readFileSync(filePath, {
+const writeDataToFileSync = (data, fileName, config) => {
+    writeFileSync(`./src/faas/${fileName}/func.js`, data, {
+        encoding: 'utf8'
+    });
+    writeFileSync(`./src/faas/${fileName}/config.json`, JSON.stringify(config), {
         encoding: 'utf8'
     })
+}
+
+function readFileSyncToData(filename) {
+    return {
+        funcjs: readFileSync(`./src/faas/${filename}/func.js`, {
+            encoding: 'utf8'
+        }),
+        confjson: readFileSync(`./src/faas/${filename}/config.json`, {
+            encoding: 'utf8'
+        }),
+    }
 }
 
 module.exports = {
