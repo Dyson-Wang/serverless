@@ -11,11 +11,12 @@ const writeDataToNewFileSync = (data, fileName, config) => {
     })
 }
 
-const writeDataToFileSync = (data, fileName, config) => {
-    writeFileSync(`./src/faas/${fileName}/func.js`, data, {
+const writeDataToTestFileSync = (data, fileName, config) => {
+    if (!existsSync(`./src/faas/${fileName}/test`)) mkdirSync(`./src/faas/${fileName}/test`);
+    writeFileSync(`./src/faas/${fileName}/test/func.js`, data, {
         encoding: 'utf8'
     });
-    writeFileSync(`./src/faas/${fileName}/config.json`, JSON.stringify(config), {
+    writeFileSync(`./src/faas/${fileName}/test/config.json`, JSON.stringify(config), {
         encoding: 'utf8'
     })
 }
@@ -32,7 +33,7 @@ function readFileSyncToData(filename) {
 }
 
 module.exports = {
-    writeDataToFileSync,
+    writeDataToTestFileSync,
     writeDataToNewFileSync,
     readFileSyncToData
 }

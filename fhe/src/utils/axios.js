@@ -24,7 +24,6 @@ export const login = async () => {
 export const getMain = async () => {
     try {
         const res = await instance.get('/main');
-        console.log(res)
         return res.data;
     } catch (err) {
         return console.log(err);

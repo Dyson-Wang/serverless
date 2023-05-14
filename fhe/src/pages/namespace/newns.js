@@ -25,7 +25,6 @@ const NewNamespace = () => {
                             icon: <CheckCircleFilled style={{ color: 'green' }} />,
                         });
                         SetBtnState(true)
-                        console.log(res)
                         getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
                     })
                     return
@@ -35,13 +34,11 @@ const NewNamespace = () => {
                     icon: <CheckCircleFilled style={{ color: 'green' }} />,
                 });
                 SetBtnState(true)
-                console.log(res)
                 getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
             }
         });
     };
     const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
     };
     return <Card
         title="namespace"
@@ -84,7 +81,6 @@ const NewNamespace = () => {
             <Form.Item style={{ marginLeft: '50%', marginRight: 'auto' }}>
                 <DbCom dbCallback={(v) => {
                     setDB(v)
-                    console.log('newns', v)
                 }} />
             </Form.Item>
 

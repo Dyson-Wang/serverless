@@ -33,7 +33,7 @@ const NewFunc = () => {
     getRandomFuncName().then(data => form.setFieldsValue({
         maxruntime: 10,
         method: 'GET',
-        funcname: data
+        funcname: data,
     }))
     const [esl, setESL] = useState(null);
     const [eslinfo, setESLinfo] = useState();
@@ -51,6 +51,9 @@ const NewFunc = () => {
     };
 
     const onFinish = (values) => {
+        if (values.method == 'GET') values.scanobj = {};
+        if (values.scanobj == undefined) values.scanobj = {};
+        values.scanobj = JSON.stringify(values.scanobj)
         showModal()
         var data = { code: editorRef.current.getValue(), ...values }
 
@@ -58,7 +61,6 @@ const NewFunc = () => {
             if (data.status == 'fail') {
                 setESLinfo(data.message)
                 setESL(false)
-                console.log(data)
                 messageApi.info({
                     content: 'error',
                     icon: <CloseCircleFilled style={{ color: 'red' }} />,
@@ -67,7 +69,6 @@ const NewFunc = () => {
             }
             setESLinfo(data)
             setESL(true)
-            console.log(data)
             messageApi.info({
                 content: 'ok',
                 icon: <CheckCircleFilled style={{ color: 'green' }} />,
@@ -75,10 +76,8 @@ const NewFunc = () => {
             SetBtnState(true)
             getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
         })
-        console.log('Success:', data);
     };
     const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
     };
 
     return (
@@ -100,7 +99,7 @@ const NewFunc = () => {
                 maskClosable={false}
             >
                 {esl == null ? <p>运行校验中...</p> : esl ?
-                    <Descriptions title="User Info" bordered layout='horizontal' >
+                    <Descriptions title="User Info" bordered layout='horizontal' column={4} >
                         <Descriptions.Item label="调用地址" span={4}>
                             {eslinfo.funcurl}
                         </Descriptions.Item>
@@ -109,9 +108,12 @@ const NewFunc = () => {
                         </Descriptions.Item>
                     </Descriptions>
                     :
-                    <Descriptions title="User Info" bordered layout='horizontal' >
+                    <Descriptions title="User Info" bordered layout='horizontal' column={4} >
                         <Descriptions.Item label="ESLint Tips" span={4}>
                             {eslinfo.esl}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="VM Tips">
+                            {eslinfo.vm}
                         </Descriptions.Item>
                     </Descriptions>
                 }
@@ -188,7 +190,7 @@ const NewFunc = () => {
                             label="输入对象实例"
                             name="scanobj"
                         >
-                            <Input.TextArea rows={4} placeholder="输入对象示例(JSON)" maxLength={1500} />
+                            <Input.TextArea rows={4} placeholder="输入对象示例(全局作用域, 默认为空对象)" maxLength={1500} />
                         </Form.Item>
                     </div>
                 </div>

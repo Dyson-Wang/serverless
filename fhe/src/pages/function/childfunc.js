@@ -14,6 +14,8 @@ const ChildFuncPage = () => {
         if (state.functionState != undefined && state.functionState.length != 0) {
             return state.functionState.map((e, i) => {
                 if (e.faasname === params.id) return e.namespace
+            }).filter((ele, i)=>{
+                if(ele != undefined)return true 
             })
         } else {
             return []

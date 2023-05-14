@@ -1,7 +1,7 @@
 const vm = require("node:vm");
 var { readFileSyncToData } = require('./file')
 
-const vmFunc = (code, data) => {
+const vmFunc = (code, data, maxruntime) => {
     var sandbox = {
         require,
         console,
@@ -9,7 +9,9 @@ const vmFunc = (code, data) => {
     };
 
     vm.createContext(sandbox);
-    return vm.runInContext(code, sandbox);
+    return vm.runInContext(code, sandbox, {
+        timeout: maxruntime
+    });
 }
 
 module.exports = vmFunc

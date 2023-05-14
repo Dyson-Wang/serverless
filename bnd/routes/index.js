@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var vmFunc = require('../utils/vm.js')
-var { writeDataToNewFileSync, readFileSyncToData, writeDataToFileSync } = require('../utils/file.js')
+var { writeDataToNewFileSync, readFileSyncToData, writeDataToTestFileSync } = require('../utils/file.js')
 var genCryptoRandomString = require('../utils/rand.js')
 var jwt = require('jsonwebtoken')
 var child_process = require('child_process');
 var dbcon = require('../utils/db.js')
+var { serveruri } = require('../utils/server.js')
 
 // 根
 router.get('/', function (req, res, next) {
@@ -75,8 +76,9 @@ router.post('/addfunc', (req, res, next) => {
   writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
 
   // ESLint
+  var stdout
   try {
-    var stdout = child_process.execSync(`eslint ./src/faas/${funcname}/func.js`);
+    stdout = child_process.execSync(`eslint ./src/faas/${funcname}/func.js`);
     console.log(stdout.toLocaleString())
   } catch (error) {
     var stdstr = error.stdout.toLocaleString()
@@ -91,7 +93,36 @@ router.post('/addfunc', (req, res, next) => {
   }
 
   // scan obj
-  const vm = vmFunc(code, scanobj)
+  if (scanobj == undefined) {
+    scanobj = {}
+  } else if (scanobj != undefined) {
+    try {
+      scanobj = JSON.parse(scanobj)
+    } catch (error) {
+      res.status(200)
+      res.send({
+        status: 'fail', message: {
+          esl: stdout.toLocaleString(),
+          vm: '输入对象格式不正确！'
+        }
+      })
+      return
+    }
+  }
+
+  var vm
+  try {
+    vm = vmFunc(code, scanobj, maxruntime)
+  } catch (error) {
+    res.status(200)
+    res.send({
+      status: 'fail', message: {
+        esl: stdout.toLocaleString(),
+        vm: error.toLocaleString()
+      }
+    })
+    return
+  }
 
   req.app.locals.pool.getConnection((error, connection) => {
     if (error) {
@@ -109,7 +140,7 @@ router.post('/addfunc', (req, res, next) => {
         return
       }
       res.status(200);
-      res.send({ status: 'ok', vm, funcurl: `http://127.0.0.1:8080/faas/${funcname}` })
+      res.send({ status: 'ok', vm, funcurl: `${serveruri}/faas/${funcname}` })
       connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
     })
   })
@@ -165,6 +196,7 @@ router.get('/config/:namespace/:id', function (req, res, next) {
         results[i].code = funcjs
         results[i].config = JSON.parse(confjson)
         results[i].createtime = results[i].createtime.toLocaleString()
+        results[i].url = `${serveruri}/faas/${funcname}`
       }
       res.status(200);
       res.send(results);
@@ -179,21 +211,59 @@ router.post('/modfunc', (req, res, next) => {
   const { browserid } = req.app.locals.decoded
 
   // fs
-  writeDataToFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
+  writeDataToTestFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
 
+  var stdout
   // ESLint
   try {
-    var stdout = child_process.execSync(`eslint ./src/faas/${funcname}/func.js`);
+    stdout = child_process.execSync(`eslint ./src/faas/${funcname}/test/func.js`);
     console.log(stdout.toLocaleString())
   } catch (error) {
-    console.log(error.stdout.toLocaleString())
+    var stdstr = error.stdout.toLocaleString()
+    res.status(200)
+    res.send({
+      status: 'fail', message: {
+        esl: stdstr.slice(stdstr.indexOf(funcname)),
+        vm: 'sleeping'
+      }
+    })
+    return
   }
 
   // scan obj
-  console.log(vmFunc(code, scanobj))
+  if (scanobj == undefined) {
+    scanobj = {}
+  } else if (scanobj != undefined) {
+    try {
+      scanobj = JSON.parse(scanobj)
+    } catch (error) {
+      res.status(200)
+      res.send({
+        status: 'fail', message: {
+          esl: stdout.toLocaleString(),
+          vm: '输入对象格式不正确！'
+        }
+      })
+      return
+    }
+  }
 
-  res.status(200)
-  res.send('ok')
+  var vm
+  try {
+    vm = vmFunc(code, scanobj, maxruntime)
+  } catch (error) {
+    res.status(200)
+    res.send({
+      status: 'fail', message: {
+        esl: stdout.toLocaleString(),
+        vm: error.toLocaleString()
+      }
+    })
+    return
+  }
+
+  res.status(200);
+  res.send({ status: 'ok', vm, funcurl: `${serveruri}/faas/${funcname}` })
 })
 
 // 请求命名空间

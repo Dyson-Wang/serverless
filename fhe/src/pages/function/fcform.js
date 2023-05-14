@@ -13,18 +13,21 @@ import {
     Divider,
     notification,
     message,
-    Alert
+    Alert,
+    Modal,
+    Descriptions
 } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons'
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons'
 import { Editor } from '@monaco-editor/react';
 import { getRandomFuncName, postModUserFunctionConfig, postUserFunction } from '../../utils/axios'
 
-const FCForm = ({ props, del = false, delCallback = () => {} }) => {
-    const { faasname, namespace, owner, createtime, invoketimes, code, config } = props
+const FCForm = ({ props, del = false, delCallback = () => { } }) => {
+    const { faasname, namespace, owner, createtime, invoketimes, code, config, url } = props
     const editorRef = useRef(null);
     const navigate = useNavigate()
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
+    const [btnState, SetBtnState] = useState(false);
 
     form.setFieldsValue({
         maxruntime: config.maxruntime,
@@ -34,24 +37,54 @@ const FCForm = ({ props, del = false, delCallback = () => {} }) => {
         funcname: faasname,
         namespace,
         owner,
-
+        url,
         createtime,
         invoketimes
     })
+
+    const [esl, setESL] = useState(null);
+    const [eslinfo, setESLinfo] = useState();
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+    const handleOk = () => {
+        setIsModalOpen(false);
+    };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
     const onFinish = (values) => {
+        if (values.method == 'GET') values.scanobj = {};
+        if (values.scanobj == undefined) values.scanobj = {};
+        values.scanobj = JSON.stringify(values.scanobj)
+        showModal()
         var data = { code: editorRef.current.getValue(), ...values }
 
         postModUserFunctionConfig(data).then(data => {
             console.log(data)
+            if (data.status == 'fail') {
+                setESLinfo(data.message)
+                setESL(false)
+                messageApi.info({
+                    content: 'error',
+                    icon: <CloseCircleFilled style={{ color: 'red' }} />,
+                });
+                return
+            }
+            setESLinfo(data)
+            setESL(true)
             messageApi.info({
                 content: 'ok',
                 icon: <CheckCircleFilled style={{ color: 'green' }} />,
             });
+            SetBtnState(true)
         })
-        console.log('Success:', data);
     };
     const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
     };
 
     return (
@@ -62,8 +95,37 @@ const FCForm = ({ props, del = false, delCallback = () => {} }) => {
             }}
             bordered={true}
             headStyle={{ textAlign: 'center' }}
-            extra={del?<Button danger type='primary' onClick={delCallback}>删除</Button>:<></>}
+            extra={del ? <Button danger type='primary' onClick={delCallback}>删除</Button> : <></>}
         >
+            <Modal
+                title={esl == null ? <div><ExclamationCircleFilled style={{ color: 'darkorange' }} /> 正在上传并校验函数...</div> : esl ? <div><CheckCircleFilled style={{ color: 'green' }} /> 上传成功</div> : <div><CloseCircleFilled style={{ color: 'red' }} /> 运行失败</div>}
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                confirmLoading={esl == null}
+                mask={true}
+                maskClosable={false}
+            >
+                {esl == null ? <p>运行校验中...</p> : esl ?
+                    <Descriptions title="User Info" bordered layout='horizontal' column={4} >
+                        <Descriptions.Item label="调用地址" span={4}>
+                            {eslinfo.funcurl}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="VM Tips">
+                            {eslinfo.vm}
+                        </Descriptions.Item>
+                    </Descriptions>
+                    :
+                    <Descriptions title="User Info" bordered layout='horizontal' column={4} >
+                        <Descriptions.Item label="ESLint Tips" span={4}>
+                            {eslinfo.esl}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="VM Tips">
+                            {eslinfo.vm}
+                        </Descriptions.Item>
+                    </Descriptions>
+                }
+            </Modal>
             {contextHolder}
             <Form
                 form={form}
@@ -114,11 +176,8 @@ const FCForm = ({ props, del = false, delCallback = () => {} }) => {
                         >
                             <Input disabled={true} />
                         </Form.Item>
-                        <Form.Item label="Method" name="method" rules={[{ required: true }]}>
-                            <Radio.Group>
-                                <Radio value="GET"> GET </Radio>
-                                <Radio value="POST"> POST </Radio>
-                            </Radio.Group>
+                        <Form.Item label="调用地址">
+                            <p>{url}</p>
                         </Form.Item>
                     </div>
 
@@ -126,6 +185,12 @@ const FCForm = ({ props, del = false, delCallback = () => {} }) => {
                     <div style={{
                         width: 450,
                     }}>
+                        <Form.Item label="Method" name="method" rules={[{ required: true }]}>
+                            <Radio.Group>
+                                <Radio value="GET"> GET </Radio>
+                                <Radio value="POST"> POST </Radio>
+                            </Radio.Group>
+                        </Form.Item>
                         <Form.Item label="maxruntime" name="maxruntime">
                             <InputNumber
                                 min={0}
@@ -143,7 +208,7 @@ const FCForm = ({ props, del = false, delCallback = () => {} }) => {
                             label="输入对象实例"
                             name="scanobj"
                         >
-                            <Input.TextArea rows={4} placeholder="输入对象示例(JSON)" maxLength={1500} />
+                            <Input.TextArea rows={4} placeholder="输入对象示例(全局作用域, GET默认为空对象)" maxLength={1500} />
                         </Form.Item>
                     </div>
                 </div>
@@ -163,7 +228,7 @@ const FCForm = ({ props, del = false, delCallback = () => {} }) => {
 
                 <Form.Item wrapperCol={{ offset: 10, span: 18 }}>
                     <Space>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" disabled={btnState}>
                             修改
                         </Button>
                         <Button type="default" onClick={() => navigate('/function')}>

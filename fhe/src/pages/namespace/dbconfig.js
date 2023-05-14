@@ -4,10 +4,8 @@ import { CheckCircleTwoTone, CloseCircleTwoTone, CloseCircleFilled } from '@ant-
 import { postTestUserDB } from '../../utils/axios';
 
 const onFinish = (values) => {
-  console.log('Success:', values);
 };
 const onFinishFailed = (errorInfo) => {
-  console.log('Failed:', errorInfo);
 };
 const DbCom = ({ dbCallback, iV = undefined }) => {
   const [form] = Form.useForm();
@@ -36,14 +34,12 @@ const DbCom = ({ dbCallback, iV = undefined }) => {
           content: 'connection error',
           icon: <CloseCircleFilled style={{ color: 'red' }} />,
         });
-        console.log(v)
         setConfirmLoading(false);
       }
     })
 
   };
   const handleCancel = () => {
-    console.log('Clicked cancel button');
     setDb(false);
   };
   return (

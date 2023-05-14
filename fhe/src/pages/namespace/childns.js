@@ -6,10 +6,8 @@ import { RedoOutlined, CheckCircleTwoTone, CloseCircleFilled, CheckCircleFilled 
 import { delUserNamespace, getUserFunction, postModUserDB, postTestUserDB, getMain, getUserNamespace } from '../../utils/axios';
 
 const onFinish = (values) => {
-    console.log('Success:', values);
 };
 const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
 };
 const DbCom = ({ dbCallback, iV = undefined, namespace }) => {
     const [form] = Form.useForm();
@@ -42,14 +40,12 @@ const DbCom = ({ dbCallback, iV = undefined, namespace }) => {
                     content: 'connection error',
                     icon: <CloseCircleFilled style={{ color: 'red' }} />,
                 });
-                console.log(v)
                 setConfirmLoading(false);
             }
         })
 
     };
     const handleCancel = () => {
-        console.log('Clicked cancel button');
         setDb(false);
     };
     return (
