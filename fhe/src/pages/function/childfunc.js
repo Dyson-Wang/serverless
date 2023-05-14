@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
-import { useSelector, } from 'react-redux'
-import { useParams } from 'react-router-dom'
-import { getUserFunctionConfig } from '../../utils/axios'
+import { useSelector, useDispatch } from 'react-redux'
+import { useParams, useNavigate } from 'react-router-dom'
+import { delUserFunction, getUserFunctionConfig, getUserFunction, getMain } from '../../utils/axios'
 import FCForm from './fcform'
+import { Button } from 'antd'
 
 const ChildFuncPage = () => {
     const [state, setState] = useState(undefined);
+    const navigate = useNavigate()
     const params = useParams();
+    const dispatch = useDispatch()
     const namespace = useSelector(state => {
         if (state.functionState != undefined && state.functionState.length != 0) {
             return state.functionState.map((e, i) => {
@@ -24,7 +27,15 @@ const ChildFuncPage = () => {
     }, [])
 
     return <>
-        {state == undefined ? <></> : <FCForm props={state} />}
+        {state == undefined ? <></> : <FCForm props={state} del={true} delCallback={() => {
+            delUserFunction(state.faasname, state.namespace).then(v => {
+                getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
+                getUserFunction().then(data => {
+                    dispatch({ type: 'setNewFunctionStatus', value: data })
+                    navigate(`/namespace/${state.namespace}`)
+                })
+            })
+        }} />}
     </>
 }
 

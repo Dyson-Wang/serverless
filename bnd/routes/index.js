@@ -27,6 +27,28 @@ router.get('/randomfuncname', (req, res, next) => {
   res.end(genCryptoRandomString(16))
 })
 
+// main 数据展示
+router.get('/main', function (req, res, next) {
+  req.app.locals.pool.getConnection((error, connection) => {
+    if (error) {
+      res.status(200)
+      res.send({ status: 'fail', message: error })
+      return
+    }
+    connection.query(`SELECT * FROM totalinfo WHERE no = 1`, (e, r, f) => {
+      if (e) {
+        res.status(200)
+        res.send({ status: 'fail', message: e })
+        connection.release()
+        return
+      }
+      res.status(200)
+      res.send({ status: 'ok', message: r })
+      connection.release()
+    })
+  })
+})
+
 // 所有函数列表
 router.get('/funclist', function (req, res, next) {
   req.app.locals.pool.getConnection((err, connection) => {
@@ -57,23 +79,38 @@ router.post('/addfunc', (req, res, next) => {
     var stdout = child_process.execSync(`eslint ./src/faas/${funcname}/func.js`);
     console.log(stdout.toLocaleString())
   } catch (error) {
-    console.log(error.stdout.toLocaleString())
+    var stdstr = error.stdout.toLocaleString()
+    res.status(200)
+    res.send({
+      status: 'fail', message: {
+        esl: stdstr.slice(stdstr.indexOf(funcname)),
+        vm: 'sleeping'
+      }
+    })
+    return
   }
 
   // scan obj
-  console.log(vmFunc(code, scanobj))
+  const vm = vmFunc(code, scanobj)
 
-  req.app.locals.pool.getConnection((err, connection) => {
-    if (err) throw err;
+  req.app.locals.pool.getConnection((error, connection) => {
+    if (error) {
+      res.status(200)
+      res.send({ status: 'fail', massage: error })
+      return
+    };
     let date = new Date();
     let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
     connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, results, fields) => {
-      res.status(200);
-      res.send({ status: 'ok', funcurl: `http://127.0.0.1:8080/faas/${funcname}` })
-      connection.release();
       if (error) {
-        console.log(error)
+        res.status(200)
+        res.send({ status: 'fail', massage: error })
+        connection.release()
+        return
       }
+      res.status(200);
+      res.send({ status: 'ok', vm, funcurl: `http://127.0.0.1:8080/faas/${funcname}` })
+      connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
     })
   })
 })
@@ -86,21 +123,19 @@ router.post('/delfunc', (req, res, next) => {
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) {
       res.status(200);
-      res.send({ status: 'fail' })
-      console.log(err)
+      res.send({ status: 'fail', message: err })
       return
     }
     connection.query(`DELETE FROM faasinfo WHERE faasname like '${funcname}' AND namespace LIKE '${namespace}'`, (error, results, fields) => {
       if (error) {
         res.status(200);
-        res.send({ status: 'fail' })
-        console.log(error)
+        res.send({ status: 'fail', message: error })
         connection.release();
         return
       }
       res.status(200);
       res.send({ status: 'ok' })
-      connection.release();
+      connection.query(`UPDATE totalinfo SET fscount = fscount - 1 WHERE no = 1;`, () => connection.release())
     })
   })
 })
@@ -181,14 +216,57 @@ router.post('/namespace', function (req, res, next) {
   let date = new Date();
   let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
   req.app.locals.pool.getConnection((err, connection) => {
-    if (err) throw err;
+    if (err) {
+      res.status(200);
+      res.send({ status: 'fail', message: err })
+      return
+    };
     connection.query(`INSERT INTO namespace(owner, namespace, createtime) VALUES ('${req.app.locals.decoded.browserid}', '${req.body.namespace}', '${dateString}')`, (error, results, fields) => {
-      res.send(results);
-      connection.release();
-      if (error) console.log(error);
+      if (error) {
+        res.status(200)
+        res.send({ status: 'fail', message: error })
+        connection.release();
+        return
+      };
+      res.status(200)
+      res.send({ status: 'ok', message: results });
+      connection.query(`UPDATE totalinfo SET nscount = nscount + 1 WHERE no = 1;`, () => connection.release())
     })
   })
 });
+
+// 删除命名空间 POST
+router.post('/delns', (req, res, next) => {
+  const { namespace } = req.body;
+  const { browserid } = req.app.locals.decoded
+
+  req.app.locals.pool.getConnection((err, connection) => {
+    if (err) {
+      res.status(200);
+      res.send({ status: 'fail', message: err })
+      return
+    }
+    connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, (error, results, fields) => {
+      if (error) {
+        res.status(200);
+        res.send({ status: 'fail', message: error })
+        connection.release();
+        return
+      }
+      connection.query(`DELETE FROM namespace WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, (e, r, f) => {
+        if (e) {
+          res.status(200);
+          res.send({ status: 'func del success but namespace del fail. please try again.', message: e })
+          connection.release();
+          return
+        }
+        res.status(200);
+        res.send({ status: 'ok' })
+        connection.query(`UPDATE totalinfo SET nscount = nscount - 1, fscount = fscount - ${results.affectedRows} WHERE no = 1;`, () => connection.release())
+      })
+    })
+  })
+})
 
 // db post test
 router.post('/dbtest', (req, res, next) => {
@@ -205,13 +283,24 @@ router.post('/dbtest', (req, res, next) => {
 })
 
 // db modify
-/*
-新建命名空间的数据库配置 可选
-修改命名空间的数据库配置
-将eslint vm返回的错误 提示用户
-首页一些数据展示的api 命名空间数、函数、HTTP GET POST、总成功总失败、数据库连接次数 不需要token
-*/
-// 
 
+router.post('/dbmod', (req, res, next) => {
+  const { username, password, host, port, database, option, namespace } = req.body;
+  const browserid = req.app.locals.decoded.browserid;
+  req.app.locals.pool.getConnection((err, connection) => {
+    if (err) {
+      res.send(err)
+      return
+    };
+    connection.query(`UPDATE namespace SET dbusername = '${username}', dbpassword = '${password}', dbhost = '${host}', dbname = '${database}', dbport = ${port} WHERE namespace LIKE '${namespace}' AND owner LIKE '${browserid}'`, (error, results, fields) => {
+      if (error) {
+        res.send(error)
+        return
+      };
+      res.send(results);
+      connection.release();
+    })
+  })
+})
 
 module.exports = router;

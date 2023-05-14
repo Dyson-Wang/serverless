@@ -5,7 +5,7 @@ import { RedoOutlined } from '@ant-design/icons';
 import DbCom from './dbconfig';
 import { getUserFunction } from '../../utils/axios';
 
-const FCTable = ({ data, db }) => {
+const FCTable = ({ data, db, dbCallback }) => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -54,7 +54,7 @@ const FCTable = ({ data, db }) => {
             marginRight: 'auto',
             marginBottom: 20
         }}>
-            {db ? <DbCom /> : <></>}
+            {db ? <DbCom dbCallback={dbCallback} /> : <></>}
             <Button
                 onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
                 style={{

@@ -20,7 +20,7 @@ import NamespaceTable from './pages/namespace/nstable';
 import NewNamespace from './pages/namespace/newns';
 import ChildNamespacePage from './pages/namespace/childns.js'
 
-import { getUserFunction, getUserNamespace, login } from './utils/axios.js';
+import { getMain, getUserFunction, getUserNamespace, login } from './utils/axios.js';
 import Title from 'antd/es/typography/Title.js';
 // import '../public/favicon.ico'
 
@@ -68,10 +68,11 @@ const App = () => {
         dispatch({ type: 'setBrowserTokenAndId', value: o });
       })
     } else {
-      navigate('/')
       dispatch({ type: 'setBrowserTokenAndId', value: bsert });
+      getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
       getUserNamespace().then(value => dispatch({ type: 'setNewNamespaceStatus', value }))
       getUserFunction().then(value => dispatch({ type: 'setNewFunctionStatus', value }))
+      navigate('/')
     }
   }, [bsert])
 

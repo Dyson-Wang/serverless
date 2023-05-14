@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import {useNavigate} from 'react-router-dom'
-import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
     Card,
@@ -13,17 +13,20 @@ import {
     Divider,
     notification,
     message,
-    Alert
+    Alert,
+    Modal,
+    Descriptions
 } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons'
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons'
 import { Editor } from '@monaco-editor/react';
-import { getRandomFuncName, postUserFunction } from '../../utils/axios'
+import { getRandomFuncName, postUserFunction, getMain } from '../../utils/axios'
 
 const NewFunc = () => {
     const [btnState, SetBtnState] = useState(false);
     const editorRef = useRef(null);
     const namespaceState = useSelector(state => state.namespaceState);
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -32,16 +35,45 @@ const NewFunc = () => {
         method: 'GET',
         funcname: data
     }))
+    const [esl, setESL] = useState(null);
+    const [eslinfo, setESLinfo] = useState();
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+    const handleOk = () => {
+        setIsModalOpen(false);
+    };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
     const onFinish = (values) => {
+        showModal()
         var data = { code: editorRef.current.getValue(), ...values }
 
         postUserFunction(data).then(data => {
+            if (data.status == 'fail') {
+                setESLinfo(data.message)
+                setESL(false)
+                console.log(data)
+                messageApi.info({
+                    content: 'error',
+                    icon: <CloseCircleFilled style={{ color: 'red' }} />,
+                });
+                return
+            }
+            setESLinfo(data)
+            setESL(true)
             console.log(data)
             messageApi.info({
                 content: 'ok',
                 icon: <CheckCircleFilled style={{ color: 'green' }} />,
             });
             SetBtnState(true)
+            getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
         })
         console.log('Success:', data);
     };
@@ -53,11 +85,37 @@ const NewFunc = () => {
         <Card
             title="add function"
             style={{
-                width: 1000, marginTop: 50, marginLeft: 'auto', marginRight: 'auto'
+                width: 1000, marginTop: 20, marginLeft: 'auto', marginRight: 'auto'
             }}
-            bordered={true}
+            bordered={false}
             headStyle={{ textAlign: 'center' }}
         >
+            <Modal
+                title={esl == null ? <div><ExclamationCircleFilled style={{ color: 'darkorange' }} /> 正在上传并校验函数...</div> : esl ? <div><CheckCircleFilled style={{ color: 'green' }} /> 上传成功</div> : <div><CloseCircleFilled style={{ color: 'red' }} /> 运行失败</div>}
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                confirmLoading={esl == null}
+                mask={true}
+                maskClosable={false}
+            >
+                {esl == null ? <p>运行校验中...</p> : esl ?
+                    <Descriptions title="User Info" bordered layout='horizontal' >
+                        <Descriptions.Item label="调用地址" span={4}>
+                            {eslinfo.funcurl}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="VM Tips">
+                            {eslinfo.vm}
+                        </Descriptions.Item>
+                    </Descriptions>
+                    :
+                    <Descriptions title="User Info" bordered layout='horizontal' >
+                        <Descriptions.Item label="ESLint Tips" span={4}>
+                            {eslinfo.esl}
+                        </Descriptions.Item>
+                    </Descriptions>
+                }
+            </Modal>
             {contextHolder}
             <Form
                 form={form}

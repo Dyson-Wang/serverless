@@ -19,7 +19,7 @@ import { CheckCircleFilled } from '@ant-design/icons'
 import { Editor } from '@monaco-editor/react';
 import { getRandomFuncName, postModUserFunctionConfig, postUserFunction } from '../../utils/axios'
 
-const FCForm = ({ props }) => {
+const FCForm = ({ props, del = false, delCallback = () => {} }) => {
     const { faasname, namespace, owner, createtime, invoketimes, code, config } = props
     const editorRef = useRef(null);
     const navigate = useNavigate()
@@ -58,10 +58,11 @@ const FCForm = ({ props }) => {
         <Card
             title="function config"
             style={{
-                width: 1000, marginTop: 50, marginLeft: 'auto', marginRight: 'auto'
+                width: 1000, marginTop: 20, marginLeft: 'auto', marginRight: 'auto'
             }}
             bordered={true}
             headStyle={{ textAlign: 'center' }}
+            extra={del?<Button danger type='primary' onClick={delCallback}>删除</Button>:<></>}
         >
             {contextHolder}
             <Form

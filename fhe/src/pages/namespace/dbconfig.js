@@ -9,7 +9,7 @@ const onFinish = (values) => {
 const onFinishFailed = (errorInfo) => {
   console.log('Failed:', errorInfo);
 };
-const DbCom = () => {
+const DbCom = ({ dbCallback, iV = undefined }) => {
   const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [hadSetDB, setHadSetDB] = useState(false);
@@ -17,7 +17,7 @@ const DbCom = () => {
   const [messageApi, contextHolder] = message.useMessage();
 
   // const [initialValues, setInitialValues] = useState({username: null, password: null, port: 3306, option: 'old'});
-  const initialValues = { host: null, username: null, password: null, port: 3306, database: null, option: 'mysql' }
+  const initialValues = iV ? iV : { host: null, username: null, password: null, port: 3306, database: null, option: 'mysql' }
   const showModal = () => {
     setDb(true);
   };
@@ -26,6 +26,7 @@ const DbCom = () => {
     setConfirmLoading(true);
     postTestUserDB(data).then((v) => {
       if (v.message == 'ok') {
+        dbCallback(data);
         setDb(false);
         setConfirmLoading(false);
         setHadSetDB(true);

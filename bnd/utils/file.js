@@ -1,8 +1,8 @@
-const { readFileSync, writeFileSync, mkdirSync } = require("node:fs");
+const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("node:fs");
 // const genCryptoRandomString = require("./rand.js");
 
 const writeDataToNewFileSync = (data, fileName, config) => {
-    mkdirSync(`./src/faas/${fileName}`);
+    if (!existsSync(`./src/faas/${fileName}`)) mkdirSync(`./src/faas/${fileName}`);
     writeFileSync(`./src/faas/${fileName}/func.js`, data, {
         encoding: 'utf8'
     });

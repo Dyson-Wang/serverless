@@ -5,7 +5,7 @@ const browsertoken = window.localStorage.getItem('browsertoken');
 
 const instance = axios.create({
     baseURL: 'http://127.0.0.1:3000',
-    timeout: 1000,
+    timeout: 10000,
 })
 
 // browsertoken
@@ -16,6 +16,16 @@ export const login = async () => {
             browserid: visitorId
         })
         return { browserid: visitorId, browsertoken: res.data.token };
+    } catch (err) {
+        return console.log(err);
+    }
+};
+
+export const getMain = async () => {
+    try {
+        const res = await instance.get('/main');
+        console.log(res)
+        return res.data;
     } catch (err) {
         return console.log(err);
     }
@@ -59,7 +69,23 @@ export const postUserNamespace = async (namespace) => {
         }, {
             headers: { Authorization: browsertoken }
         })
-        return res;
+        return res.data;
+    } catch (err) {
+        return {status: 'axios fail', message: 'error'};
+    }
+};
+
+// 删除函数
+export const delUserNamespace = async (namespace) => {
+    try {
+        const res = await instance.post(`/delns`, {
+            namespace
+        }, {
+            headers: {
+                Authorization: browsertoken
+            }
+        });
+        return res.data;
     } catch (err) {
         return console.log(err);
     }
@@ -148,6 +174,7 @@ export const postModUserFunctionConfig = async (data) => {
     }
 };
 
+// test db
 export const postTestUserDB = async (data) => {
     try {
         const res = await instance.post('/dbtest', data, {
@@ -160,5 +187,20 @@ export const postTestUserDB = async (data) => {
         return console.log(err)
     }
 }
+
+//
+export const postModUserDB = async (data) => {
+    try {
+        const res = await instance.post('/dbmod', data, {
+            headers: {
+                Authorization: browsertoken
+            }
+        })
+        return res.data;
+    } catch (err) {
+        return console.log(err)
+    }
+}
+
 
 export default instance;

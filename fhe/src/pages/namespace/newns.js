@@ -1,26 +1,43 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Button, Card, Form, Input, Space, message } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { postUserNamespace } from '../../utils/axios';
+import { postModUserDB, postUserNamespace, getMain } from '../../utils/axios';
 import DbCom from './dbconfig';
 
 const NewNamespace = () => {
     const [btnState, SetBtnState] = useState(false);
+    const [db, setDB] = useState(null);
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const browserid = useSelector(state => state.browserid);
 
     const [messageApi, contextHolder] = message.useMessage();
 
     const onFinish = (values) => {
         postUserNamespace(values.namespace).then(res => {
-            messageApi.info({
-                content: 'ok',
-                icon: <CheckCircleFilled style={{ color: 'green' }} />,
-            });
-            SetBtnState(true)
-            console.log(res)
+            if (res.status == 'ok') {
+                if (db != null) {
+                    postModUserDB({ ...db, namespace: values.namespace }).then((v) => {
+                        messageApi.info({
+                            content: 'ok',
+                            icon: <CheckCircleFilled style={{ color: 'green' }} />,
+                        });
+                        SetBtnState(true)
+                        console.log(res)
+                        getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
+                    })
+                    return
+                }
+                messageApi.info({
+                    content: 'ok',
+                    icon: <CheckCircleFilled style={{ color: 'green' }} />,
+                });
+                SetBtnState(true)
+                console.log(res)
+                getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
+            }
         });
     };
     const onFinishFailed = (errorInfo) => {
@@ -65,7 +82,10 @@ const NewNamespace = () => {
             </Form.Item>
 
             <Form.Item style={{ marginLeft: '50%', marginRight: 'auto' }}>
-                <DbCom />
+                <DbCom dbCallback={(v) => {
+                    setDB(v)
+                    console.log('newns', v)
+                }} />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 10 }}>
