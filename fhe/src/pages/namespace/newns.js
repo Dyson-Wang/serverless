@@ -78,14 +78,16 @@ const NewNamespace = () => {
                 <Input />
             </Form.Item>
 
-            <Form.Item style={{ marginLeft: '50%', marginRight: 'auto' }}>
+            {/* <Form.Item style={{ marginLeft: '50%', marginRight: 'auto' }}> */}
+            <div style={{ width: '100%', display: 'flex', justifyContent:'center' }}>
                 <DbCom dbCallback={(v) => {
                     setDB(v)
                 }} />
-            </Form.Item>
+            </div>
+            {/* </Form.Item> */}
 
-            <Form.Item wrapperCol={{ offset: 10 }}>
-                <Space>
+            <Form.Item>
+                <Space style={{width: '552px', display: 'flex', justifyContent: 'center', marginTop: '10px'}}>
                     <Button type="primary" htmlType="submit" disabled={btnState}>
                         创建
                     </Button>

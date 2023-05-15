@@ -46,9 +46,11 @@ const DbCom = ({ dbCallback, iV = undefined }) => {
     <>
       {hadSetDB ? <Button type='default'>
         <CheckCircleTwoTone />
-      </Button> : <Button type='default' onClick={showModal}>
-        设置数据库服务
-      </Button>}
+      </Button> :
+        <Button type='default' onClick={showModal}>
+          设置数据库服务
+        </Button>
+      }
 
       <Modal
         title="DB serve"

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -21,6 +21,16 @@ import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@
 import { Editor } from '@monaco-editor/react';
 import { getRandomFuncName, postUserFunction, getMain } from '../../utils/axios'
 
+const editorDefaultString = `function func() {
+    /*
+        全局内置了require模块、glob对象(包含请求参数键值对、mysql对象、stdw输出流方法)
+    */
+
+    // 请以此调用作为HTTP响应,传入Buffer或者Object
+    glob.stdw('hello serverless!')
+}
+func()`
+
 const NewFunc = () => {
     const [btnState, SetBtnState] = useState(false);
     const editorRef = useRef(null);
@@ -29,12 +39,16 @@ const NewFunc = () => {
     const dispatch = useDispatch()
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
+    const [isGet, setIsGet] = useState(true);
 
-    getRandomFuncName().then(data => form.setFieldsValue({
-        maxruntime: 10,
-        method: 'GET',
-        funcname: data,
-    }))
+    useEffect(() => {
+        getRandomFuncName().then(data => form.setFieldsValue({
+            maxruntime: 10,
+            method: 'GET',
+            funcname: data,
+        }))
+    }, [])
+
     const [esl, setESL] = useState(null);
     const [eslinfo, setESLinfo] = useState();
 
@@ -56,6 +70,7 @@ const NewFunc = () => {
         values.scanobj = JSON.stringify(values.scanobj)
         showModal()
         var data = { code: editorRef.current.getValue(), ...values }
+        console.log(data)
 
         postUserFunction(data).then(data => {
             if (data.status == 'fail') {
@@ -129,7 +144,13 @@ const NewFunc = () => {
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
-
+                onValuesChange={(cv) => {
+                    if (cv.method != undefined && cv.method == 'GET') {
+                        setIsGet(true)
+                    } else if (cv.method != undefined && cv.method == 'POST') {
+                        setIsGet(false)
+                    }
+                }}
             >
                 <div style={{ display: 'flex', marginRight: 'auto' }}>
                     <div style={{
@@ -190,7 +211,7 @@ const NewFunc = () => {
                             label="输入对象实例"
                             name="scanobj"
                         >
-                            <Input.TextArea rows={4} placeholder="输入对象示例(全局作用域, 默认为空对象)" maxLength={1500} />
+                            <Input.TextArea rows={4} placeholder="输入对象示例(全局作用域, 默认为空对象)" maxLength={1500} disabled={isGet} />
                         </Form.Item>
                     </div>
                 </div>
@@ -200,7 +221,7 @@ const NewFunc = () => {
                         height="300px"
                         width="800px"
                         defaultLanguage='javascript'
-                        defaultValue={`function func(){return "express"};func();`}
+                        defaultValue={editorDefaultString}
                         onMount={(editor, monaco) => {
                             editorRef.current = editor
                         }}

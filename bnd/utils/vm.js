@@ -1,16 +1,22 @@
 const vm = require("node:vm");
-var { readFileSyncToData } = require('./file')
 
 const vmFunc = (code, data, maxruntime) => {
     var sandbox = {
-        require,
+        glob: {
+            ...data
+        },
+        require: (pkgname)=>{
+            if(pkgname.includes('os')) return undefined
+            return require(pkgname);
+        },
         console,
-        ...data
+        Date
     };
 
     vm.createContext(sandbox);
-    return vm.runInContext(code, sandbox, {
-        timeout: maxruntime
+    return vm.runInNewContext(code, sandbox, {
+        timeout: maxruntime,
+        microtaskMode: 'afterEvaluate'
     });
 }
 

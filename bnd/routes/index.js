@@ -54,23 +54,24 @@ router.get('/main', function (req, res, next) {
 router.get('/funclist', function (req, res, next) {
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) console.log(err);
-    connection.query(`SELECT * FROM faasInfo`, (error, results, fields) => {
-      for (let i = 0; i < results.length; i++) {
-        results[i].createtime = results[i].createtime.toLocaleString()
+    connection.query(`SELECT * FROM faasInfo`, (error, vms, fields) => {
+      for (let i = 0; i < vms.length; i++) {
+        vms[i].createtime = vms[i].createtime.toLocaleString()
       }
       connection.release();
       if (error) {
         console.log(error)
       }
-      res.send(results);
+      res.send(vms);
     })
   })
 });
 
 // 添加函数 POST
 router.post('/addfunc', (req, res, next) => {
-  const { funcname, namespace, method, maxruntime, code, comments, scanobj } = req.body;
+  const { funcname, namespace, method, maxruntime, code, comments } = req.body;
   const { browserid } = req.app.locals.decoded
+  var { scanobj } = req.body
 
   // fs
   writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
@@ -99,6 +100,7 @@ router.post('/addfunc', (req, res, next) => {
     try {
       scanobj = JSON.parse(scanobj)
     } catch (error) {
+      console.log(error)
       res.status(200)
       res.send({
         status: 'fail', message: {
@@ -110,38 +112,119 @@ router.post('/addfunc', (req, res, next) => {
     }
   }
 
-  var vm
-  try {
-    vm = vmFunc(code, scanobj, maxruntime)
-  } catch (error) {
+  if (!code.includes('glob.stdw(')) {
     res.status(200)
     res.send({
       status: 'fail', message: {
         esl: stdout.toLocaleString(),
-        vm: error.toLocaleString()
+        vm: '没有返回值: 函数未调用global.stdw()标准输出流函数！'
       }
     })
     return
   }
 
-  req.app.locals.pool.getConnection((error, connection) => {
-    if (error) {
+  req.app.locals.pool.getConnection((err, connection) => {
+    if (err) {
       res.status(200)
-      res.send({ status: 'fail', massage: error })
+      res.send({
+        status: 'fail', message: {
+          esl: stdout.toLocaleString(),
+          vm: err.toLocaleString()
+        }
+      })
       return
     };
-    let date = new Date();
-    let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-    connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, results, fields) => {
-      if (error) {
-        res.status(200)
-        res.send({ status: 'fail', massage: error })
-        connection.release()
-        return
+    connection.query(`select dbusername, dbpassword, dbhost, dbname, dbport from namespace where namespace like '${namespace}' and owner like '${browserid}'`, (e, r, f) => {
+      var stdw = (v) => {
+        let date = new Date();
+        let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+        switch (typeof (v)) {
+          case 'string':
+            connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, vms, fields) => {
+              try {
+                if (error) {
+                  res.status(200)
+                  res.send({
+                    status: 'fail', massage: {
+                      esl: stdout.toLocaleString(),
+                      vm: error
+                    }
+                  })
+                  connection.release()
+                  return
+                }
+                res.status(200);
+                res.send({ status: 'ok', vm: v, funcurl: `${serveruri}/faas/${funcname}` })
+                connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
+              } catch (error) {
+                console.log(error)
+              }
+            })
+            break;
+          case 'object':
+            connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, vms, fields) => {
+              try {
+                if (error) {
+                  res.status(200)
+                  res.send({
+                    status: 'fail', massage: {
+                      esl: stdout.toLocaleString(),
+                      vm: error
+                    }
+                  })
+                  connection.release()
+                  return
+                }
+                res.status(200);
+                res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : v.toLocaleString(), funcurl: `${serveruri}/faas/${funcname}` })
+                connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
+              } catch (error) {
+                console.log(error)
+              }
+            })
+            break;
+          default:
+            res.send({
+              status: 'fail', message: {
+                esl: stdout.toLocaleString(),
+                vm: 'global.stdw函数的调用值必须为string或者buffer'
+              }
+            })
+            connection.release()
+            break;
+        }
       }
-      res.status(200);
-      res.send({ status: 'ok', vm, funcurl: `${serveruri}/faas/${funcname}` })
-      connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
+      if (r[0].dbusername == undefined) {
+        try {
+          vmFunc(code, { ...scanobj, stdw }, maxruntime);
+        } catch (error) {
+          res.status(200)
+          res.send({
+            status: 'fail', message: {
+              esl: stdout.toLocaleString(),
+              vm: error.toLocaleString()
+            }
+          })
+          connection.release()
+          return
+        }
+      } else {
+        var config = r[0]
+        var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
+        try {
+          vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
+        } catch (error) {
+          res.status(200)
+          res.send({
+            status: 'fail', message: {
+              esl: stdout.toLocaleString(),
+              vm: error.toLocaleString()
+            }
+          })
+          connection.release()
+          return
+        }
+      }
     })
   })
 })
@@ -157,7 +240,7 @@ router.post('/delfunc', (req, res, next) => {
       res.send({ status: 'fail', message: err })
       return
     }
-    connection.query(`DELETE FROM faasinfo WHERE faasname like '${funcname}' AND namespace LIKE '${namespace}'`, (error, results, fields) => {
+    connection.query(`DELETE FROM faasinfo WHERE faasname like '${funcname}' AND namespace LIKE '${namespace}'`, (error, vms, fields) => {
       if (error) {
         res.status(200);
         res.send({ status: 'fail', message: error })
@@ -183,7 +266,7 @@ router.get('/config/:namespace/:id', function (req, res, next) {
       console.log(err)
       return
     }
-    connection.query(`SELECT * FROM faasinfo WHERE faasname LIKE '${funcname}'`, (error, results, fields) => {
+    connection.query(`SELECT * FROM faasinfo WHERE faasname LIKE '${funcname}'`, (error, vms, fields) => {
       if (error) {
         res.status(200);
         res.send({ status: 'fail' })
@@ -192,14 +275,14 @@ router.get('/config/:namespace/:id', function (req, res, next) {
         return
       }
       const { funcjs, confjson } = readFileSyncToData(funcname);
-      for (let i = 0; i < results.length; i++) {
-        results[i].code = funcjs
-        results[i].config = JSON.parse(confjson)
-        results[i].createtime = results[i].createtime.toLocaleString()
-        results[i].url = `${serveruri}/faas/${funcname}`
+      for (let i = 0; i < vms.length; i++) {
+        vms[i].code = funcjs
+        vms[i].config = JSON.parse(confjson)
+        vms[i].createtime = vms[i].createtime.toLocaleString()
+        vms[i].url = `${serveruri}/faas/${funcname}`
       }
       res.status(200);
-      res.send(results);
+      res.send(vms);
       connection.release();
     })
   })
@@ -207,9 +290,9 @@ router.get('/config/:namespace/:id', function (req, res, next) {
 
 // 修改函数 POST
 router.post('/modfunc', (req, res, next) => {
-  const { funcname, namespace, method, maxruntime, code, comments, scanobj } = req.body;
+  const { funcname, namespace, method, maxruntime, code, comments } = req.body;
   const { browserid } = req.app.locals.decoded
-
+  var { scanobj } = req.body
   // fs
   writeDataToTestFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
 
@@ -217,7 +300,6 @@ router.post('/modfunc', (req, res, next) => {
   // ESLint
   try {
     stdout = child_process.execSync(`eslint ./src/faas/${funcname}/test/func.js`);
-    console.log(stdout.toLocaleString())
   } catch (error) {
     var stdstr = error.stdout.toLocaleString()
     res.status(200)
@@ -248,33 +330,90 @@ router.post('/modfunc', (req, res, next) => {
     }
   }
 
-  var vm
-  try {
-    vm = vmFunc(code, scanobj, maxruntime)
-  } catch (error) {
+  if (!code.includes('glob.stdw(')) {
     res.status(200)
     res.send({
       status: 'fail', message: {
         esl: stdout.toLocaleString(),
-        vm: error.toLocaleString()
+        vm: '没有返回值: 函数未调用global.stdw()标准输出流函数！'
       }
     })
     return
   }
 
-  res.status(200);
-  res.send({ status: 'ok', vm, funcurl: `${serveruri}/faas/${funcname}` })
+  req.app.locals.pool.getConnection((err, connection) => {
+    connection.query(`select dbusername, dbpassword, dbhost, dbname, dbport from namespace, faasinfo where faasname like '${funcname}' and faasinfo.namespace = namespace.namespace and faasinfo.owner = namespace.owner`, (e, r, f) => {
+      var stdw = (v) => {
+        try {
+          switch (typeof (v)) {
+            case 'string':
+              writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
+              res.send({ status: 'ok', vm: v, funcurl: `${serveruri}/faas/${funcname}` })
+              connection.release()
+              break;
+            case 'object':
+              writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
+              res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : JSON.stringify(v), funcurl: `${serveruri}/faas/${funcname}` })
+              connection.release()
+              break;
+            default:
+              res.send({
+                status: 'fail', message: {
+                  esl: stdout.toLocaleString(),
+                  vm: 'global.stdw函数的调用值必须为string或者buffer'
+                }
+              })
+              connection.release()
+              break;
+          }
+        } catch (error) {
+
+        }
+      }
+      if (r[0].dbusername == undefined) {
+        try {
+          vmFunc(code, { ...scanobj, stdw }, maxruntime);
+        } catch (error) {
+          res.status(200)
+          res.send({
+            status: 'fail', message: {
+              esl: stdout.toLocaleString(),
+              vm: error.toLocaleString()
+            }
+          }).end()
+          connection.release()
+          return
+        }
+      } else {
+        var config = r[0]
+        var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
+        try {
+          vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
+        } catch (error) {
+          res.status(200)
+          res.send({
+            status: 'fail', message: {
+              esl: stdout.toLocaleString(),
+              vm: error.toLocaleString()
+            }
+          }).end()
+          connection.release()
+          return
+        }
+      }
+    })
+  })
 })
 
 // 请求命名空间
 router.get('/namespace', function (req, res, next) {
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) throw err;
-    connection.query(`SELECT * FROM namespace WHERE owner LIKE '${req.app.locals.decoded.browserid}'`, (error, results, fields) => {
-      for (let i = 0; i < results.length; i++) {
-        results[i].createtime = results[i].createtime.toLocaleString()
+    connection.query(`SELECT * FROM namespace WHERE owner LIKE '${req.app.locals.decoded.browserid}'`, (error, vms, fields) => {
+      for (let i = 0; i < vms.length; i++) {
+        vms[i].createtime = vms[i].createtime.toLocaleString()
       }
-      res.send(results);
+      res.send(vms);
       connection.release();
       if (error) console.log(error);
     })
@@ -291,7 +430,7 @@ router.post('/namespace', function (req, res, next) {
       res.send({ status: 'fail', message: err })
       return
     };
-    connection.query(`INSERT INTO namespace(owner, namespace, createtime) VALUES ('${req.app.locals.decoded.browserid}', '${req.body.namespace}', '${dateString}')`, (error, results, fields) => {
+    connection.query(`INSERT INTO namespace(owner, namespace, createtime) VALUES ('${req.app.locals.decoded.browserid}', '${req.body.namespace}', '${dateString}')`, (error, vms, fields) => {
       if (error) {
         res.status(200)
         res.send({ status: 'fail', message: error })
@@ -299,8 +438,8 @@ router.post('/namespace', function (req, res, next) {
         return
       };
       res.status(200)
-      res.send({ status: 'ok', message: results });
-      connection.query(`UPDATE totalinfo SET nscount = nscount + 1 WHERE no = 1;`, () => connection.release())
+      res.send({ status: 'ok', message: vms });
+      connection.query(`UPDATE totalinfo SET nscount = nscount + 1 WHERE no = 1`, () => connection.release())
     })
   })
 });
@@ -316,7 +455,7 @@ router.post('/delns', (req, res, next) => {
       res.send({ status: 'fail', message: err })
       return
     }
-    connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, (error, results, fields) => {
+    connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, (error, vms, fields) => {
       if (error) {
         res.status(200);
         res.send({ status: 'fail', message: error })
@@ -332,7 +471,7 @@ router.post('/delns', (req, res, next) => {
         }
         res.status(200);
         res.send({ status: 'ok' })
-        connection.query(`UPDATE totalinfo SET nscount = nscount - 1, fscount = fscount - ${results.affectedRows} WHERE no = 1;`, () => connection.release())
+        connection.query(`UPDATE totalinfo SET nscount = nscount - 1, fscount = fscount - ${vms.affectedRows} WHERE no = 1;`, () => connection.release())
       })
     })
   })
@@ -362,12 +501,12 @@ router.post('/dbmod', (req, res, next) => {
       res.send(err)
       return
     };
-    connection.query(`UPDATE namespace SET dbusername = '${username}', dbpassword = '${password}', dbhost = '${host}', dbname = '${database}', dbport = ${port} WHERE namespace LIKE '${namespace}' AND owner LIKE '${browserid}'`, (error, results, fields) => {
+    connection.query(`UPDATE namespace SET dbusername = '${username}', dbpassword = '${password}', dbhost = '${host}', dbname = '${database}', dbport = ${port} WHERE namespace LIKE '${namespace}' AND owner LIKE '${browserid}'`, (error, vms, fields) => {
       if (error) {
         res.send(error)
         return
       };
-      res.send(results);
+      res.send(vms);
       connection.release();
     })
   })
