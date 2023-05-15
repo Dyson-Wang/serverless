@@ -2,7 +2,7 @@
   "name": "fhe",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://127.0.0.1:8080",
+  "proxy": "http://8.130.24.65:8080",
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@fingerprintjs/fingerprintjs": "^3.4.1",
