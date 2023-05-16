@@ -78,7 +78,7 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
         // if (values.method == 'GET') values.scanobj = {};
         // if (values.scanobj == undefined) values.scanobj = {};
         try {
-            values.scanobj = JSON.parse(values.scanobj.slice(1, -1))
+            values.scanobj = JSON.parse(values.scanobj)
         } catch (error) {
             messageApi.info({
                 content: '输入对象实例应为json字符串格式',
