@@ -204,7 +204,17 @@ router.post('/addfunc', (req, res, next) => {
       }
       if (r[0].dbusername == undefined) {
         try {
-          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
+          setTimeout(() => {
+            res.status(200)
+            res.send({
+              status: 'fail', message: {
+                esl: stdout.toLocaleString(),
+                vm: 'Execute function time out!'
+              }
+            }).end()
+            connection.release()
+            // throw new Error('Execute function time out!')
+          }, maxruntime)
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
         } catch (error) {
           res.status(200)
@@ -221,7 +231,17 @@ router.post('/addfunc', (req, res, next) => {
         var config = r[0]
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
-          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
+          setTimeout(() => {
+            res.status(200)
+            res.send({
+              status: 'fail', message: {
+                esl: stdout.toLocaleString(),
+                vm: 'Execute function time out!'
+              }
+            }).end()
+            connection.release()
+            // throw new Error('Execute function time out!')
+          }, maxruntime)
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
         } catch (error) {
           res.status(200)
@@ -388,7 +408,17 @@ router.post('/modfunc', (req, res, next) => {
       }
       if (r[0].dbusername == undefined) {
         try {
-          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
+          setTimeout(() => {
+            res.status(200)
+            res.send({
+              status: 'fail', message: {
+                esl: stdout.toLocaleString(),
+                vm: 'Execute function time out!'
+              }
+            }).end()
+            connection.release()
+            // throw new Error('Execute function time out!')
+          }, maxruntime)
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
         } catch (error) {
           res.status(200)
@@ -405,7 +435,17 @@ router.post('/modfunc', (req, res, next) => {
         var config = r[0]
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
-          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
+          setTimeout(() => {
+            res.status(200)
+            res.send({
+              status: 'fail', message: {
+                esl: stdout.toLocaleString(),
+                vm: 'Execute function time out!'
+              }
+            }).end()
+            connection.release()
+            // throw new Error('Execute function time out!')
+          }, maxruntime)
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
         } catch (error) {
           res.status(200)
