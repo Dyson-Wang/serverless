@@ -151,6 +151,8 @@ router.post('/addfunc', (req, res, next) => {
             connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, vms, fields) => {
               try {
                 if (error) {
+                  if (res.locals.isResponsed == true) return
+                  res.locals.isResponsed = true;
                   res.status(200)
                   res.send({
                     status: 'fail', massage: {
@@ -161,6 +163,8 @@ router.post('/addfunc', (req, res, next) => {
                   connection.release()
                   return
                 }
+                if (res.locals.isResponsed == true) return
+                res.locals.isResponsed = true;
                 res.status(200);
                 res.send({ status: 'ok', vm: v, funcurl: `${serveruri}/faas/${funcname}` })
                 connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
@@ -173,6 +177,8 @@ router.post('/addfunc', (req, res, next) => {
             connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, vms, fields) => {
               try {
                 if (error) {
+                  if (res.locals.isResponsed == true) return
+                  res.locals.isResponsed = true;
                   res.status(200)
                   res.send({
                     status: 'fail', massage: {
@@ -183,6 +189,8 @@ router.post('/addfunc', (req, res, next) => {
                   connection.release()
                   return
                 }
+                if (res.locals.isResponsed == true) return
+                res.locals.isResponsed = true;
                 res.status(200);
                 res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : JSON.stringify(v), funcurl: `${serveruri}/faas/${funcname}` })
                 connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
@@ -192,6 +200,8 @@ router.post('/addfunc', (req, res, next) => {
             })
             break;
           default:
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.send({
               status: 'fail', message: {
                 esl: stdout.toLocaleString(),
@@ -205,6 +215,8 @@ router.post('/addfunc', (req, res, next) => {
       if (r[0].dbusername == undefined) {
         try {
           setTimeout(() => {
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(200)
             res.send({
               status: 'fail', message: {
@@ -217,6 +229,8 @@ router.post('/addfunc', (req, res, next) => {
           }, maxruntime)
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(200)
           res.send({
             status: 'fail', message: {
@@ -232,6 +246,8 @@ router.post('/addfunc', (req, res, next) => {
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
           setTimeout(() => {
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(200)
             res.send({
               status: 'fail', message: {
@@ -244,6 +260,8 @@ router.post('/addfunc', (req, res, next) => {
           }, maxruntime)
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(200)
           res.send({
             status: 'fail', message: {

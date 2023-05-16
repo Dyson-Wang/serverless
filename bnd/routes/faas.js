@@ -20,12 +20,18 @@ router.get('/:id', function (req, res, next) {
     try {
       switch (typeof (v)) {
         case 'string':
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(200).send(v)
           break;
         case 'object':
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           Buffer.isBuffer(v) ? res.status(200).send(v) : res.status(200).send(JSON.stringify(v))
           break
         default:
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(400).send('incorrect params!')
           break;
       }
@@ -40,12 +46,18 @@ router.get('/:id', function (req, res, next) {
         try {
           setTimeout(() => {
             // throw new Error('Execute function time out!')
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
+            connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
@@ -59,12 +71,18 @@ router.get('/:id', function (req, res, next) {
         try {
           setTimeout(() => {
             // throw new Error('Execute function time out!')
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
+            connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { mysql, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
@@ -103,12 +121,18 @@ router.post('/:id', function (req, res, next) {
       try {
         switch (typeof (v)) {
           case 'string':
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(200).send(v)
             break;
           case 'object':
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             Buffer.isBuffer(v) ? res.status(200).send(v) : res.status(200).send(JSON.stringify(v))
             break
           default:
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(400).send('incorrect params!')
             break;
         }
@@ -122,12 +146,18 @@ router.post('/:id', function (req, res, next) {
         try {
           setTimeout(() => {
             // throw new Error('Execute function time out!')
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
+            connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { ...data, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
@@ -141,12 +171,18 @@ router.post('/:id', function (req, res, next) {
         try {
           setTimeout(() => {
             // throw new Error('Execute function time out!')
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
+            connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { ...data, mysql, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
