@@ -19,7 +19,7 @@ import {
 } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons'
 import { Editor } from '@monaco-editor/react';
-import { getRandomFuncName, postUserFunction, getMain } from '../../utils/axios'
+import { getRandomFuncName, postUserFunction, getMain, getUserFunction } from '../../utils/axios'
 
 const editorDefaultString = `function func() {
     /*
@@ -90,6 +90,7 @@ const NewFunc = () => {
             });
             SetBtnState(true)
             getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
+            getUserFunction(browsertoken).then(value => dispatch({ type: 'setNewFunctionStatus', value }))
         })
     };
     const onFinishFailed = (errorInfo) => {

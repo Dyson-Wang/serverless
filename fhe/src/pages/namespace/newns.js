@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Button, Card, Form, Input, Space, message } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { postModUserDB, postUserNamespace, getMain } from '../../utils/axios';
+import { postModUserDB, postUserNamespace, getMain, getUserFunction, getUserNamespace } from '../../utils/axios';
 import DbCom from './dbconfig';
 
 const NewNamespace = () => {
@@ -27,6 +27,8 @@ const NewNamespace = () => {
                         });
                         SetBtnState(true)
                         getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
+                        getUserNamespace(browsertoken).then(value => dispatch({ type: 'setNewNamespaceStatus', value }))
+                        // getUserFunction(browsertoken).then(value => dispatch({ type: 'setNewFunctionStatus', value }))
                     })
                     return
                 }
@@ -36,6 +38,7 @@ const NewNamespace = () => {
                 });
                 SetBtnState(true)
                 getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
+                getUserNamespace(browsertoken).then(value => dispatch({ type: 'setNewNamespaceStatus', value }))
             }
         });
     };

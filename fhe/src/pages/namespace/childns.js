@@ -246,10 +246,8 @@ const ChildNamespacePage = () => {
                     delUserNamespace(namespace.namespace, browsertoken).then(v => {
                         navigate(`/namespace`)
                         getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
-
-                        getUserNamespace(browsertoken).then(value => {
-                            dispatch({ type: 'setNewNamespaceStatus', value });
-                        })
+                        getUserNamespace(browsertoken).then(value => dispatch({ type: 'setNewNamespaceStatus', value }))
+                        getUserFunction(browsertoken).then(value => dispatch({ type: 'setNewFunctionStatus', value }))
                     })
                 }}
                 style={{

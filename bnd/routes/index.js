@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var vmFunc = require('../utils/vm.js')
-var { writeDataToNewFileSync, readFileSyncToData, writeDataToTestFileSync } = require('../utils/file.js')
+var { writeDataToNewFileSync, readFileSyncToData, writeDataToTestFileSync, rmDirRecursiveSync } = require('../utils/file.js')
 var genCryptoRandomString = require('../utils/rand.js')
 var jwt = require('jsonwebtoken')
 var child_process = require('child_process');
@@ -80,6 +80,8 @@ router.post('/addfunc', (req, res, next) => {
   // scan obj
   if (scanobj == undefined) {
     scanobj = {}
+  }else if (typeof(scanobj)=='object'){
+
   } else if (scanobj != undefined) {
     try {
       if (typeof (scanobj) != 'string') throw new Error
@@ -255,6 +257,7 @@ router.post('/delfunc', (req, res, next) => {
       }
       res.status(200);
       res.send({ status: 'ok' })
+      rmDirRecursiveSync(funcname);
       connection.query(`UPDATE totalinfo SET fscount = fscount - 1 WHERE no = 1;`, () => connection.release())
     })
   })
@@ -466,7 +469,7 @@ router.post('/delns', (req, res, next) => {
       res.send({ status: 'fail', message: err })
       return
     }
-    connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, (error, vms, fields) => {
+    connection.query(`SELECT faasname FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, (error, vms, fields) => {
       if (error) {
         res.status(200);
         res.send({ status: 'fail', message: error })
@@ -482,7 +485,13 @@ router.post('/delns', (req, res, next) => {
         }
         res.status(200);
         res.send({ status: 'ok' })
-        connection.query(`UPDATE totalinfo SET nscount = nscount - 1, fscount = fscount - ${vms.affectedRows} WHERE no = 1;`, () => connection.release())
+        connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, ()=>{})
+        connection.query(`UPDATE totalinfo SET nscount = nscount - 1, fscount = fscount - ${vms.length} WHERE no = 1;`, () => connection.release())
+        for (let index = 0; index < vms.length; index++) {
+          const element = vms[index].faasname;
+          console.log(element)
+          rmDirRecursiveSync(element)
+        }
       })
     })
   })

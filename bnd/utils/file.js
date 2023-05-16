@@ -1,4 +1,4 @@
-const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("node:fs");
+const { readFileSync, writeFileSync, mkdirSync, existsSync, rmdirSync, rmSync } = require("node:fs");
 // const genCryptoRandomString = require("./rand.js");
 
 const writeDataToNewFileSync = (data, fileName, config) => {
@@ -21,6 +21,13 @@ const writeDataToTestFileSync = (data, fileName, config) => {
     })
 }
 
+const rmDirRecursiveSync = (filename) => {
+    if (!existsSync(`./src/faas/${filename}`)) return
+    rmSync(`./src/faas/${filename}`, {
+        recursive: true
+    })
+}
+
 function readFileSyncToData(filename) {
     return {
         funcjs: readFileSync(`./src/faas/${filename}/func.js`, {
@@ -35,5 +42,6 @@ function readFileSyncToData(filename) {
 module.exports = {
     writeDataToTestFileSync,
     writeDataToNewFileSync,
-    readFileSyncToData
+    readFileSyncToData,
+    rmDirRecursiveSync
 }
