@@ -80,7 +80,7 @@ router.post('/addfunc', (req, res, next) => {
   // scan obj
   if (scanobj == undefined) {
     scanobj = {}
-  }else if (typeof(scanobj)=='object'){
+  } else if (typeof (scanobj) == 'object') {
 
   } else if (scanobj != undefined) {
     try {
@@ -204,7 +204,10 @@ router.post('/addfunc', (req, res, next) => {
       }
       if (r[0].dbusername == undefined) {
         try {
+          var start = Date.now();
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
+          var end = Date.now();
+          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -220,7 +223,10 @@ router.post('/addfunc', (req, res, next) => {
         var config = r[0]
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
+          var start = Date.now();
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
+          var end = Date.now();
+          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -306,9 +312,9 @@ router.post('/modfunc', (req, res, next) => {
   // scan obj
   if (scanobj == undefined) {
     scanobj = {}
-  }else if(typeof(scanobj)=='object'){
+  } else if (typeof (scanobj) == 'object') {
 
-  }else if (scanobj != undefined) {
+  } else if (scanobj != undefined) {
     try {
       if (typeof (scanobj) != 'string') throw new Error
       scanobj = JSON.parse(scanobj)
@@ -386,7 +392,10 @@ router.post('/modfunc', (req, res, next) => {
       }
       if (r[0].dbusername == undefined) {
         try {
+          var start = Date.now();
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
+          var end = Date.now();
+          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -402,7 +411,10 @@ router.post('/modfunc', (req, res, next) => {
         var config = r[0]
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
+          var start = Date.now();
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
+          var end = Date.now();
+          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -485,7 +497,7 @@ router.post('/delns', (req, res, next) => {
         }
         res.status(200);
         res.send({ status: 'ok' })
-        connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, ()=>{})
+        connection.query(`DELETE FROM faasinfo WHERE owner LIKE '${browserid}' AND namespace LIKE '${namespace}'`, () => { })
         connection.query(`UPDATE totalinfo SET nscount = nscount - 1, fscount = fscount - ${vms.length} WHERE no = 1;`, () => connection.release())
         for (let index = 0; index < vms.length; index++) {
           const element = vms[index].faasname;
