@@ -155,7 +155,7 @@ router.post('/addfunc', (req, res, next) => {
                   res.locals.isResponsed = true;
                   res.status(200)
                   res.send({
-                    status: 'fail', massage: {
+                    status: 'fail', message: {
                       esl: stdout.toLocaleString(),
                       vm: error
                     }
@@ -181,7 +181,7 @@ router.post('/addfunc', (req, res, next) => {
                   res.locals.isResponsed = true;
                   res.status(200)
                   res.send({
-                    status: 'fail', massage: {
+                    status: 'fail', message: {
                       esl: stdout.toLocaleString(),
                       vm: error
                     }
