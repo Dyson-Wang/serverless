@@ -269,7 +269,7 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
                         <Button type="primary" htmlType="submit" disabled={btnState}>
                             修改
                         </Button>
-                        <Button type="default" onClick={() => navigate('/function')}>
+                        <Button type="default" onClick={() => navigate(-1)}>
                             返回
                         </Button>
                     </Space>

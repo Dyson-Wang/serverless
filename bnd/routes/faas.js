@@ -13,6 +13,8 @@ router.get('/:id', function (req, res, next) {
     res.send('unsupport method')
     req.app.locals.pool.getConnection((err, connection) => {
       connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`, () => connection.release())
+      connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
+      connection.release()
     })
     return
   }
@@ -50,10 +52,12 @@ router.get('/:id', function (req, res, next) {
             res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
             connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
             connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalsc = totalsc + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
         } catch (error) {
           if (res.locals.isResponsed == true) return
@@ -61,6 +65,7 @@ router.get('/:id', function (req, res, next) {
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
           return
         }
@@ -75,10 +80,12 @@ router.get('/:id', function (req, res, next) {
             res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
             connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
             connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { mysql, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalsc = totalsc + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
         } catch (error) {
           if (res.locals.isResponsed == true) return
@@ -86,6 +93,7 @@ router.get('/:id', function (req, res, next) {
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
           return
         }
@@ -108,6 +116,8 @@ router.post('/:id', function (req, res, next) {
         return
       }
       connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`, () => connection.release())
+      connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
+      connection.release()
     })
     return
   }
@@ -137,7 +147,7 @@ router.post('/:id', function (req, res, next) {
             break;
         }
       } catch (error) {
-        
+
       }
     }
     connection.query(`select dbusername, dbpassword, dbhost, dbname, dbport from namespace, faasinfo where faasname like '${req.params.id}' and faasinfo.namespace = namespace.namespace and faasinfo.owner = namespace.owner`, (e, r, f) => {
@@ -150,10 +160,12 @@ router.post('/:id', function (req, res, next) {
             res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
             connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
             connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { ...data, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalsc = totalsc + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
         } catch (error) {
           if (res.locals.isResponsed == true) return
@@ -161,6 +173,7 @@ router.post('/:id', function (req, res, next) {
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
           return
         }
@@ -175,10 +188,12 @@ router.post('/:id', function (req, res, next) {
             res.locals.isResponsed = true;
             res.status(400).send('Execute function time out!').end()
             connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
+            connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
             connection.release()
           }, option.maxruntime)
           result = vmFunc(o.funcjs, { ...data, mysql, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalsc = totalsc + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
         } catch (error) {
           if (res.locals.isResponsed == true) return
@@ -186,6 +201,7 @@ router.post('/:id', function (req, res, next) {
           res.status(400)
           res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
+          connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
           connection.release()
           return
         }

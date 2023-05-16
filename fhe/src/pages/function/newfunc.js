@@ -241,7 +241,7 @@ const NewFunc = () => {
                         <Button type="primary" htmlType="submit" disabled={btnState}>
                             创建
                         </Button>
-                        <Button type="default" onClick={() => navigate('/function')}>
+                        <Button type="default" onClick={() => navigate(-1)}>
                             返回
                         </Button>
                     </Space>

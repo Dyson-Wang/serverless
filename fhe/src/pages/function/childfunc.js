@@ -35,7 +35,8 @@ const ChildFuncPage = () => {
                 getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
                 getUserFunction(browsertoken).then(data => {
                     dispatch({ type: 'setNewFunctionStatus', value: data })
-                    navigate(`/namespace/${state.namespace}`)
+                    // history.back()
+                    navigate(-1)
                 })
             })
         }} />}
