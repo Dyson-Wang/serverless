@@ -2,6 +2,7 @@ const vm = require("node:vm");
 
 const vmFunc = (code, data, maxruntime) => {
     var sandbox = {
+        ...global,
         glob: {
             ...data
         },
@@ -17,5 +18,4 @@ const vmFunc = (code, data, maxruntime) => {
         microtaskMode: 'afterEvaluate'
     });
 }
-
 module.exports = vmFunc
