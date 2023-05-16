@@ -384,15 +384,21 @@ router.post('/modfunc', (req, res, next) => {
           switch (typeof (v)) {
             case 'string':
               writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
+              if (res.locals.isResponsed == true) return
+              res.locals.isResponsed = true;
               res.send({ status: 'ok', vm: v, funcurl: `${serveruri}/faas/${funcname}` })
               connection.release()
               break;
             case 'object':
               writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
+              if (res.locals.isResponsed == true) return
+              res.locals.isResponsed = true;
               res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : JSON.stringify(v), funcurl: `${serveruri}/faas/${funcname}` })
               connection.release()
               break;
             default:
+              if (res.locals.isResponsed == true) return
+              res.locals.isResponsed = true;
               res.send({
                 status: 'fail', message: {
                   esl: stdout.toLocaleString(),
@@ -409,6 +415,8 @@ router.post('/modfunc', (req, res, next) => {
       if (r[0].dbusername == undefined) {
         try {
           setTimeout(() => {
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(200)
             res.send({
               status: 'fail', message: {
@@ -421,6 +429,8 @@ router.post('/modfunc', (req, res, next) => {
           }, maxruntime)
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(200)
           res.send({
             status: 'fail', message: {
@@ -436,6 +446,8 @@ router.post('/modfunc', (req, res, next) => {
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
           setTimeout(() => {
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             res.status(200)
             res.send({
               status: 'fail', message: {
@@ -448,6 +460,8 @@ router.post('/modfunc', (req, res, next) => {
           }, maxruntime)
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
         } catch (error) {
+          if (res.locals.isResponsed == true) return
+          res.locals.isResponsed = true;
           res.status(200)
           res.send({
             status: 'fail', message: {
