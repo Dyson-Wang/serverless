@@ -8,6 +8,7 @@ import { getUserFunction } from '../../utils/axios';
 const FCTable = ({ data, db, dbCallback }) => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
+    const browsertoken = useSelector(state => state.browsertoken)
 
     const columns = [
         {
@@ -56,7 +57,7 @@ const FCTable = ({ data, db, dbCallback }) => {
         }}>
             {db ? <DbCom dbCallback={dbCallback} /> : <></>}
             <Button
-                onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
+                onClick={(e) => getUserFunction(browsertoken).then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
                 style={{
                     marginLeft: 'auto',
                     marginRight: '10px'

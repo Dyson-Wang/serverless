@@ -8,6 +8,7 @@ const NamespaceTable = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch();
     const data = useSelector(state => state.namespaceState);
+    const browsertoken = useSelector(state => state.browsertoken)
     const columns = [
         {
             title: '命名空间',
@@ -37,7 +38,7 @@ const NamespaceTable = () => {
             marginBottom: 20
         }}>
             <Button
-                onClick={(e) => getUserNamespace().then(data => dispatch({ type: 'setNewNamespaceStatus', value: data }))}
+                onClick={(e) => getUserNamespace(browsertoken).then(data => dispatch({ type: 'setNewNamespaceStatus', value: data }))}
                 style={{
                     marginLeft: 'auto',
                     marginRight: '10px'

@@ -10,6 +10,7 @@ const ChildFuncPage = () => {
     const navigate = useNavigate()
     const params = useParams();
     const dispatch = useDispatch()
+    const browsertoken = useSelector(state => state.browsertoken)
     const namespace = useSelector(state => {
         if (state.functionState != undefined && state.functionState.length != 0) {
             return state.functionState.map((e, i) => {
@@ -25,14 +26,14 @@ const ChildFuncPage = () => {
         if (namespace.length == 0) {
             return
         }
-        getUserFunctionConfig(params.id, namespace[0]).then(v => setState(v[0]))
+        getUserFunctionConfig(params.id, namespace[0], browsertoken).then(v => setState(v[0]))
     }, [])
 
     return <>
         {state == undefined ? <></> : <FCForm props={state} del={true} delCallback={() => {
-            delUserFunction(state.faasname, state.namespace).then(v => {
+            delUserFunction(state.faasname, state.namespace, browsertoken).then(v => {
                 getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
-                getUserFunction().then(data => {
+                getUserFunction(browsertoken).then(data => {
                     dispatch({ type: 'setNewFunctionStatus', value: data })
                     navigate(`/namespace/${state.namespace}`)
                 })

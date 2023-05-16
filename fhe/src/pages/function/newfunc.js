@@ -40,6 +40,7 @@ const NewFunc = () => {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
     const [isGet, setIsGet] = useState(true);
+    const browsertoken = useSelector(state => state.browsertoken)
 
     useEffect(() => {
         getRandomFuncName().then(data => form.setFieldsValue({
@@ -72,7 +73,7 @@ const NewFunc = () => {
         var data = { code: editorRef.current.getValue(), ...values }
         console.log(data)
 
-        postUserFunction(data).then(data => {
+        postUserFunction(data, browsertoken).then(data => {
             if (data.status == 'fail') {
                 setESLinfo(data.message)
                 setESL(false)

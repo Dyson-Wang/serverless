@@ -70,8 +70,8 @@ const App = () => {
     } else {
       dispatch({ type: 'setBrowserTokenAndId', value: bsert });
       getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
-      getUserNamespace().then(value => dispatch({ type: 'setNewNamespaceStatus', value }))
-      getUserFunction().then(value => dispatch({ type: 'setNewFunctionStatus', value }))
+      getUserNamespace(bsert.browsertoken).then(value => dispatch({ type: 'setNewNamespaceStatus', value }))
+      getUserFunction(bsert.browsertoken).then(value => dispatch({ type: 'setNewFunctionStatus', value }))
       navigate('/')
     }
   }, [bsert])

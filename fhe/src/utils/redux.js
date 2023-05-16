@@ -38,5 +38,6 @@ function counterReducer(state = {
 
 let store = createStore(counterReducer)
 
+store.subscribe(() => console.log(store.getState()))
 
 export default store;

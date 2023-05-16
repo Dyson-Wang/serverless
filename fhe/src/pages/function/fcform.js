@@ -38,6 +38,7 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
     const [btnState, SetBtnState] = useState(false);
+    const browsertoken = useSelector(state => state.browsertoken)
 
     useEffect(() => form.setFieldsValue({
         maxruntime: config.maxruntime,
@@ -76,7 +77,7 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
         showModal()
         var data = { code: editorRef.current.getValue(), ...values }
 
-        postModUserFunctionConfig(data).then(data => {
+        postModUserFunctionConfig(data, browsertoken).then(data => {
             console.log(data)
             if (data.status == 'fail') {
                 setESLinfo(data.message)

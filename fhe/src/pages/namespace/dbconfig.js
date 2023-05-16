@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Form, Input, Modal, Radio, message } from 'antd';
 import { CheckCircleTwoTone, CloseCircleTwoTone, CloseCircleFilled } from '@ant-design/icons'
 import { postTestUserDB } from '../../utils/axios';
@@ -13,6 +14,7 @@ const DbCom = ({ dbCallback, iV = undefined }) => {
   const [hadSetDB, setHadSetDB] = useState(false);
   const [db, setDb] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const browsertoken = useSelector(state => state.browsertoken)
 
   // const [initialValues, setInitialValues] = useState({username: null, password: null, port: 3306, option: 'old'});
   const initialValues = iV ? iV : { host: null, username: null, password: null, port: 3306, database: null, option: 'mysql' }
@@ -22,7 +24,7 @@ const DbCom = ({ dbCallback, iV = undefined }) => {
   const handleOk = () => {
     const data = form.getFieldsValue()
     setConfirmLoading(true);
-    postTestUserDB(data).then((v) => {
+    postTestUserDB(data, browsertoken).then((v) => {
       if (v.message == 'ok') {
         dbCallback(data);
         setDb(false);

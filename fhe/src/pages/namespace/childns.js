@@ -15,6 +15,7 @@ const DbCom = ({ dbCallback, iV = undefined, namespace }) => {
     const [hadSetDB, setHadSetDB] = useState(false);
     const [db, setDb] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
+    const browsertoken = useSelector(state => state.browsertoken)
 
     const initialValues = iV ? iV : { host: null, username: null, password: null, port: 3306, database: null, option: 'mysql' }
     const showModal = () => {
@@ -23,9 +24,9 @@ const DbCom = ({ dbCallback, iV = undefined, namespace }) => {
     const handleOk = () => {
         const data = form.getFieldsValue()
         setConfirmLoading(true);
-        postTestUserDB(data).then((v) => {
+        postTestUserDB(data, browsertoken).then((v) => {
             if (v.message == 'ok') {
-                postModUserDB({ ...data, namespace: namespace }).then((v) => {
+                postModUserDB({ ...data, namespace: namespace }, browsertoken).then((v) => {
                     messageApi.info({
                         content: 'ok',
                         icon: <CheckCircleFilled style={{ color: 'green' }} />,
@@ -163,6 +164,8 @@ const ChildNamespacePage = () => {
         if (ele.namespace == params.id) return true
     }))[0]
 
+    const browsertoken = useSelector(state => state.browsertoken)
+
     var iV = undefined
 
     if (namespace.dbhost != null) {
@@ -226,7 +229,7 @@ const ChildNamespacePage = () => {
         }}>
             <DbCom iV={iV} namespace={namespace.namespace} />
             <Button
-                onClick={(e) => getUserFunction().then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
+                onClick={(e) => getUserFunction(browsertoken).then(data => dispatch({ type: 'setNewFunctionStatus', value: data }))}
                 style={{
                     marginLeft: 'auto',
                     marginRight: '10px'
@@ -240,11 +243,11 @@ const ChildNamespacePage = () => {
             <Button
                 type='primary'
                 onClick={() => {
-                    delUserNamespace(namespace.namespace).then(v => {
+                    delUserNamespace(namespace.namespace, browsertoken).then(v => {
                         navigate(`/namespace`)
                         getMain().then(value => dispatch({ type: 'setMainInfo', value: value.message[0] }))
 
-                        getUserNamespace().then(value => {
+                        getUserNamespace(browsertoken).then(value => {
                             dispatch({ type: 'setNewNamespaceStatus', value });
                         })
                     })

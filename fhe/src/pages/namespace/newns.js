@@ -12,14 +12,15 @@ const NewNamespace = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const browserid = useSelector(state => state.browserid);
+    const browsertoken = useSelector(state => state.browsertoken)
 
     const [messageApi, contextHolder] = message.useMessage();
 
     const onFinish = (values) => {
-        postUserNamespace(values.namespace).then(res => {
+        postUserNamespace(values.namespace, browsertoken).then(res => {
             if (res.status == 'ok') {
                 if (db != null) {
-                    postModUserDB({ ...db, namespace: values.namespace }).then((v) => {
+                    postModUserDB({ ...db, namespace: values.namespace }, browsertoken).then((v) => {
                         messageApi.info({
                             content: 'ok',
                             icon: <CheckCircleFilled style={{ color: 'green' }} />,

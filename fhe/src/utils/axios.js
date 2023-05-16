@@ -1,10 +1,9 @@
 import axios from "axios";
 import fingerprintjs from '@fingerprintjs/fingerprintjs'
 
-const browsertoken = window.localStorage.getItem('browsertoken');
-
 const instance = axios.create({
     baseURL: 'http://8.130.24.65:3000',
+    // baseURL: 'http://8.130.24.65:3000',
     timeout: 10000,
 })
 
@@ -42,7 +41,7 @@ export const getRandomFuncName = async () => {
 }
 
 // namespace list
-export const getUserNamespace = async () => {
+export const getUserNamespace = async (browsertoken) => {
     try {
         const res = await instance.get('/namespace', {
             headers: {
@@ -61,7 +60,7 @@ export const getUserNamespace = async () => {
 };
 
 // 创建namespace
-export const postUserNamespace = async (namespace) => {
+export const postUserNamespace = async (namespace, browsertoken) => {
     try {
         const res = await instance.post('/namespace', {
             namespace: namespace
@@ -75,7 +74,7 @@ export const postUserNamespace = async (namespace) => {
 };
 
 // 删除函数
-export const delUserNamespace = async (namespace) => {
+export const delUserNamespace = async (namespace, browsertoken) => {
     try {
         const res = await instance.post(`/delns`, {
             namespace
@@ -91,7 +90,7 @@ export const delUserNamespace = async (namespace) => {
 };
 
 // function list
-export const getUserFunction = async () => {
+export const getUserFunction = async (browsertoken) => {
     try {
         const res = await instance.get('/funclist', {
             headers: {
@@ -110,7 +109,7 @@ export const getUserFunction = async () => {
 };
 
 // 创建function
-export const postUserFunction = async (data) => {
+export const postUserFunction = async (data, browsertoken) => {
     try {
 
         const res = await instance.post('/addfunc', data, {
@@ -125,7 +124,7 @@ export const postUserFunction = async (data) => {
 };
 
 // 删除函数
-export const delUserFunction = async (funcname, namespace) => {
+export const delUserFunction = async (funcname, namespace, browsertoken) => {
     try {
         const res = await instance.post(`/delfunc`, {
             funcname, namespace
@@ -141,7 +140,7 @@ export const delUserFunction = async (funcname, namespace) => {
 };
 
 // 获取函数详情
-export const getUserFunctionConfig = async (funcname, namespace) => {
+export const getUserFunctionConfig = async (funcname, namespace, browsertoken) => {
     try {
         const res = await instance.get(`/config/${namespace}/${funcname}`, {
             headers: {
@@ -160,7 +159,7 @@ export const getUserFunctionConfig = async (funcname, namespace) => {
 };
 
 // 修改函数详情
-export const postModUserFunctionConfig = async (data) => {
+export const postModUserFunctionConfig = async (data, browsertoken) => {
     try {
         const res = await instance.post('/modfunc', data, {
             headers: {
@@ -174,7 +173,7 @@ export const postModUserFunctionConfig = async (data) => {
 };
 
 // test db
-export const postTestUserDB = async (data) => {
+export const postTestUserDB = async (data, browsertoken) => {
     try {
         const res = await instance.post('/dbtest', data, {
             headers: {
@@ -188,7 +187,7 @@ export const postTestUserDB = async (data) => {
 }
 
 //
-export const postModUserDB = async (data) => {
+export const postModUserDB = async (data, browsertoken) => {
     try {
         const res = await instance.post('/dbmod', data, {
             headers: {
