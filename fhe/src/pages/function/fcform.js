@@ -59,7 +59,11 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
 
 
     const [esl, setESL] = useState(null);
-    const [eslinfo, setESLinfo] = useState();
+    const [eslinfo, setESLinfo] = useState({
+        funcurl: '',
+        vm: '',
+        esl: ''
+    });
     const [isGet, setIsGet] = useState(true);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,7 +98,7 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
         postModUserFunctionConfig(data, browsertoken).then(data => {
             console.log(data)
             if (data.status == 'fail') {
-                setESLinfo(data.message)
+                setESLinfo({...eslinfo, ...data.message})
                 setESL(false)
                 messageApi.info({
                     content: 'error',
@@ -102,7 +106,7 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
                 });
                 return
             }
-            setESLinfo(data)
+            setESLinfo({...eslinfo, ...data})
             setESL(true)
             messageApi.info({
                 content: 'ok',
