@@ -204,10 +204,8 @@ router.post('/addfunc', (req, res, next) => {
       }
       if (r[0].dbusername == undefined) {
         try {
-          var start = Date.now();
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
-          var end = Date.now();
-          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -223,10 +221,8 @@ router.post('/addfunc', (req, res, next) => {
         var config = r[0]
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
-          var start = Date.now();
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
-          var end = Date.now();
-          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -392,10 +388,8 @@ router.post('/modfunc', (req, res, next) => {
       }
       if (r[0].dbusername == undefined) {
         try {
-          var start = Date.now();
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           vmFunc(code, { ...scanobj, stdw }, maxruntime);
-          var end = Date.now();
-          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({
@@ -411,10 +405,8 @@ router.post('/modfunc', (req, res, next) => {
         var config = r[0]
         var mysql = dbcon(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         try {
-          var start = Date.now();
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           vmFunc(code, { ...scanobj, mysql, stdw }, maxruntime);
-          var end = Date.now();
-          if (end - start > maxruntime) throw new Error('run time out!')
         } catch (error) {
           res.status(200)
           res.send({

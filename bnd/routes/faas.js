@@ -35,12 +35,13 @@ router.get('/:id', function (req, res, next) {
       if (r[0].dbusername == undefined) {
         var result
         try {
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           result = vmFunc(o.funcjs, { stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
           res.status(400)
-          res.send('fail to run this function please check your params! ' + error.toLocaleString())
+          res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
           connection.release()
           return
@@ -50,12 +51,13 @@ router.get('/:id', function (req, res, next) {
         var mysql = getConnectionFromRemote(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         var result
         try {
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           result = vmFunc(o.funcjs, { mysql, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
           res.status(400)
-          res.send('fail to run this function please check your params! ' + error.toLocaleString())
+          res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
           connection.release()
           return
@@ -105,12 +107,13 @@ router.post('/:id', function (req, res, next) {
       if (r[0].dbusername == undefined) {
         var result
         try {
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           result = vmFunc(o.funcjs, { ...data, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
           res.status(400)
-          res.send('fail to run this function please check your params! ' + error.toLocaleString())
+          res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
           connection.release()
           return
@@ -120,12 +123,13 @@ router.post('/:id', function (req, res, next) {
         var mysql = getConnectionFromRemote(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         var result
         try {
+          setTimeout(() => { throw new Error('Execute function time out!') }, maxruntime)
           result = vmFunc(o.funcjs, { ...data, mysql, stdw }, option.maxruntime);
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalsc = totalsc + 1 WHERE no = 1`)
           connection.release()
         } catch (error) {
           res.status(400)
-          res.send('fail to run this function please check your params! ' + error.toLocaleString())
+          res.send('fail to run this function ! ' + error.toLocaleString())
           connection.query(`UPDATE totalinfo SET httppost = httppost + 1, totalfail = totalfail + 1 WHERE no = 1`)
           connection.release()
           return
