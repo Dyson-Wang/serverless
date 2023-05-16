@@ -26,7 +26,7 @@ const editorDefaultString = `function func() {
         全局内置了require模块、glob对象(包含请求参数键值对、mysql对象、stdw输出流方法)
     */
 
-    // 请以此调用作为HTTP响应,传入Buffer或者Object
+    // 请以此调用作为HTTP响应,传入String、Buffer或者Object
     glob.stdw('hello serverless!')
 }
 func()`

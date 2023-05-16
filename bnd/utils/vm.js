@@ -8,9 +8,7 @@ const vmFunc = (code, data, maxruntime) => {
         require: (pkgname)=>{
             if(pkgname.includes('os')) return undefined
             return require(pkgname);
-        },
-        console,
-        Date
+        }
     };
 
     vm.createContext(sandbox);
