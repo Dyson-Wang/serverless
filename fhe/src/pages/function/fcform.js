@@ -69,9 +69,11 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
     };
     const handleOk = () => {
         setIsModalOpen(false);
+        setESL(null)
     };
     const handleCancel = () => {
         setIsModalOpen(false);
+        setESL(null)
     };
 
     const onFinish = (values) => {

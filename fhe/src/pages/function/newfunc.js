@@ -60,9 +60,11 @@ const NewFunc = () => {
     };
     const handleOk = () => {
         setIsModalOpen(false);
+        setESL(null)
     };
     const handleCancel = () => {
         setIsModalOpen(false);
+        setESL(null)
     };
 
     const onFinish = (values) => {
