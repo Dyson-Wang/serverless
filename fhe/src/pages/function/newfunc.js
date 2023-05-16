@@ -68,7 +68,6 @@ const NewFunc = () => {
     const onFinish = (values) => {
         if (values.method == 'GET') values.scanobj = {};
         if (values.scanobj == undefined) values.scanobj = {};
-        values.scanobj = JSON.stringify(values.scanobj)
         showModal()
         var data = { code: editorRef.current.getValue(), ...values }
         console.log(data)

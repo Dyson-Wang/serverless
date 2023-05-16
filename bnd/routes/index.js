@@ -55,7 +55,7 @@ router.get('/funclist', function (req, res, next) {
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) console.log(err);
     connection.query(`SELECT * FROM faasinfo`, (error, vms, fields) => {
-      if(error) {
+      if (error) {
         res.status(500).send([])
         return
       }
@@ -77,6 +77,27 @@ router.post('/addfunc', (req, res, next) => {
   const { browserid } = req.app.locals.decoded
   var { scanobj } = req.body
 
+  // scan obj
+  if (scanobj == undefined) {
+    scanobj = {}
+  } else if (scanobj != undefined) {
+    try {
+      if (typeof (scanobj) != 'string') throw new Error
+      if (scanobj.charAt(0) != '{' || scanobj.charAt(scanobj.length - 1) != '}') throw new Error
+      scanobj = (new Function("return " + scanobj))()
+      console.log(scanobj)
+    } catch (error) {
+      res.status(200)
+      res.send({
+        status: 'fail', message: {
+          esl: '输入对象格式不正确！',
+          vm: 'sleeping'
+        }
+      })
+      return
+    }
+  }
+
   // fs
   writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
 
@@ -95,25 +116,6 @@ router.post('/addfunc', (req, res, next) => {
       }
     })
     return
-  }
-
-  // scan obj
-  if (scanobj == undefined) {
-    scanobj = {}
-  } else if (scanobj != undefined) {
-    try {
-      scanobj = JSON.parse(scanobj)
-    } catch (error) {
-      console.log(error)
-      res.status(200)
-      res.send({
-        status: 'fail', message: {
-          esl: stdout.toLocaleString(),
-          vm: '输入对象格式不正确！'
-        }
-      })
-      return
-    }
   }
 
   if (!code.includes('glob.stdw(')) {
@@ -180,7 +182,7 @@ router.post('/addfunc', (req, res, next) => {
                   return
                 }
                 res.status(200);
-                res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : v.toLocaleString(), funcurl: `${serveruri}/faas/${funcname}` })
+                res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : JSON.stringify(v), funcurl: `${serveruri}/faas/${funcname}` })
                 connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
               } catch (error) {
                 console.log(error)
@@ -297,6 +299,29 @@ router.post('/modfunc', (req, res, next) => {
   const { funcname, namespace, method, maxruntime, code, comments } = req.body;
   const { browserid } = req.app.locals.decoded
   var { scanobj } = req.body
+
+  // scan obj
+  if (scanobj == undefined) {
+    scanobj = {}
+  }else if(typeof(scanobj)=='object'){
+
+  }else if (scanobj != undefined) {
+    try {
+      if (typeof (scanobj) != 'string') throw new Error
+      scanobj = JSON.parse(scanobj)
+      console.log(scanobj)
+    } catch (error) {
+      res.status(200)
+      res.send({
+        status: 'fail', message: {
+          esl: '输入对象格式不正确！',
+          vm: 'sleeping'
+        }
+      })
+      return
+    }
+  }
+
   // fs
   writeDataToTestFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
 
@@ -314,24 +339,6 @@ router.post('/modfunc', (req, res, next) => {
       }
     })
     return
-  }
-
-  // scan obj
-  if (scanobj == undefined) {
-    scanobj = {}
-  } else if (scanobj != undefined) {
-    try {
-      scanobj = JSON.parse(scanobj)
-    } catch (error) {
-      res.status(200)
-      res.send({
-        status: 'fail', message: {
-          esl: stdout.toLocaleString(),
-          vm: '输入对象格式不正确！'
-        }
-      })
-      return
-    }
   }
 
   if (!code.includes('glob.stdw(')) {

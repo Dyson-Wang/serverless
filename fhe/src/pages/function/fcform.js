@@ -39,19 +39,23 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [btnState, SetBtnState] = useState(false);
     const browsertoken = useSelector(state => state.browsertoken)
+    console.log(config.scanobj)
 
-    useEffect(() => form.setFieldsValue({
-        maxruntime: config.maxruntime,
-        method: config.method,
-        comments: config.comments,
-        scanobj: JSON.stringify(config.scanobj),
-        funcname: faasname,
-        namespace,
-        owner,
-        url,
-        createtime,
-        invoketimes
-    }), [])
+    useEffect(() => {
+        form.setFieldsValue({
+            maxruntime: config.maxruntime,
+            method: config.method,
+            comments: config.comments,
+            scanobj: JSON.stringify(config.scanobj),
+            funcname: faasname,
+            namespace,
+            owner,
+            url,
+            createtime,
+            invoketimes
+        })
+        config.method == 'GET' ? setIsGet(true) : setIsGet(false)
+    }, [])
 
 
     const [esl, setESL] = useState(null);
@@ -73,7 +77,15 @@ const FCForm = ({ props, del = false, delCallback = () => { } }) => {
     const onFinish = (values) => {
         if (values.method == 'GET') values.scanobj = {};
         if (values.scanobj == undefined) values.scanobj = {};
-        values.scanobj = JSON.stringify(values.scanobj)
+        try {
+            values.scanobj = JSON.parse(values.scanobj)
+        } catch (error) {
+            messageApi.info({
+                content: '输入对象实例应为json字符串格式',
+                icon: <CloseCircleFilled style={{ color: 'red' }} />,
+            });
+            return
+        }
         showModal()
         var data = { code: editorRef.current.getValue(), ...values }
 
