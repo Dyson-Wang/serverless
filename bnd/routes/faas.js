@@ -12,7 +12,7 @@ router.get('/:id', function (req, res, next) {
   if (option.method != "GET") {
     res.send('unsupport method')
     req.app.locals.pool.getConnection((err, connection) => {
-      connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`, () => connection.release())
+      connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
       connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
       connection.release()
     })
@@ -73,6 +73,7 @@ router.get('/:id', function (req, res, next) {
         var config = r[0]
         var mysql = getConnectionFromRemote(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
         var result
+        connection.query(`UPDATE totalinfo SET sqlservice = sqlservice + 1 WHERE no = 1`)
         try {
           setTimeout(() => {
             // throw new Error('Execute function time out!')
@@ -115,7 +116,7 @@ router.post('/:id', function (req, res, next) {
         res.status(500).send('server error')
         return
       }
-      connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`, () => connection.release())
+      connection.query(`UPDATE totalinfo SET httpget = httpget + 1, totalfail = totalfail + 1 WHERE no = 1`)
       connection.query(`UPDATE faasinfo SET invoketimes = invoketimes + 1 WHERE faasname like '${req.params.id}'`)
       connection.release()
     })
@@ -180,6 +181,7 @@ router.post('/:id', function (req, res, next) {
       } else {
         var config = r[0]
         var mysql = getConnectionFromRemote(config.dbhost, config.dbusername, config.dbpassword, config.dbport, config.dbname)
+        connection.query(`UPDATE totalinfo SET sqlservice = sqlservice + 1 WHERE no = 1`)
         var result
         try {
           setTimeout(() => {
