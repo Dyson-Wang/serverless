@@ -148,11 +148,11 @@ router.post('/addfunc', (req, res, next) => {
         let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
         switch (typeof (v)) {
           case 'string':
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, vms, fields) => {
               try {
                 if (error) {
-                  if (res.locals.isResponsed == true) return
-                  res.locals.isResponsed = true;
                   res.status(200)
                   res.send({
                     status: 'fail', message: {
@@ -163,8 +163,6 @@ router.post('/addfunc', (req, res, next) => {
                   connection.release()
                   return
                 }
-                if (res.locals.isResponsed == true) return
-                res.locals.isResponsed = true;
                 res.status(200);
                 res.send({ status: 'ok', vm: v, funcurl: `${serveruri}/faas/${funcname}` })
                 connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
@@ -174,11 +172,11 @@ router.post('/addfunc', (req, res, next) => {
             })
             break;
           case 'object':
+            if (res.locals.isResponsed == true) return
+            res.locals.isResponsed = true;
             connection.query(`INSERT INTO faasinfo(faasname, namespace, owner, createtime, invoketimes) VALUES ('${funcname}', '${namespace}', '${browserid}', '${dateString}', ${0})`, (error, vms, fields) => {
               try {
                 if (error) {
-                  if (res.locals.isResponsed == true) return
-                  res.locals.isResponsed = true;
                   res.status(200)
                   res.send({
                     status: 'fail', message: {
@@ -189,8 +187,6 @@ router.post('/addfunc', (req, res, next) => {
                   connection.release()
                   return
                 }
-                if (res.locals.isResponsed == true) return
-                res.locals.isResponsed = true;
                 res.status(200);
                 res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : JSON.stringify(v), funcurl: `${serveruri}/faas/${funcname}` })
                 connection.query(`UPDATE totalinfo SET fscount = fscount + 1 WHERE no = 1;`, () => connection.release())
@@ -401,16 +397,16 @@ router.post('/modfunc', (req, res, next) => {
         try {
           switch (typeof (v)) {
             case 'string':
-              writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
               if (res.locals.isResponsed == true) return
               res.locals.isResponsed = true;
+              writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
               res.send({ status: 'ok', vm: v, funcurl: `${serveruri}/faas/${funcname}` })
               connection.release()
               break;
             case 'object':
-              writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
               if (res.locals.isResponsed == true) return
               res.locals.isResponsed = true;
+              writeDataToNewFileSync(code, funcname, { funcname, namespace, method, maxruntime, comments, scanobj });
               res.send({ status: 'ok', vm: Buffer.isBuffer(v) ? v : JSON.stringify(v), funcurl: `${serveruri}/faas/${funcname}` })
               connection.release()
               break;
