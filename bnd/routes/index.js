@@ -54,7 +54,7 @@ router.get('/main', function (req, res, next) {
 router.get('/funclist', function (req, res, next) {
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) console.log(err);
-    connection.query(`SELECT * FROM faasinfo`, (error, vms, fields) => {
+    connection.query(`SELECT * FROM faasinfo WHERE owner LIKE '${req.app.locals.decoded.browserid}'`, (error, vms, fields) => {
       if (error) {
         res.status(500).send([])
         return
