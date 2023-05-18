@@ -2,7 +2,8 @@ import axios from "axios";
 import fingerprintjs from '@fingerprintjs/fingerprintjs'
 
 const instance = axios.create({
-    baseURL: 'http://127.0.0.1:3000',
+    // baseURL: 'http://127.0.0.1:3000',
+    baseURL: 'http://8.130.24.65:3000',
     timeout: 10000,
 })
 
