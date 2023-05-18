@@ -145,7 +145,7 @@ router.post('/addfunc', (req, res, next) => {
     connection.query(`select dbusername, dbpassword, dbhost, dbname, dbport from namespace where namespace like '${namespace}' and owner like '${browserid}'`, (e, r, f) => {
       var stdw = (v) => {
         let date = new Date();
-        let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+        let dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
         switch (typeof (v)) {
           case 'string':
             if (res.locals.isResponsed == true) return
@@ -509,7 +509,7 @@ router.get('/namespace', function (req, res, next) {
 // 创建命名空间
 router.post('/namespace', function (req, res, next) {
   let date = new Date();
-  let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+  let dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
   req.app.locals.pool.getConnection((err, connection) => {
     if (err) {
       res.status(200);
