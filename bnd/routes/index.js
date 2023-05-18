@@ -571,13 +571,25 @@ router.post('/delns', (req, res, next) => {
 
 // db post test
 router.post('/dbtest', (req, res, next) => {
+  res.locals.isres = false
   const { username, password, host, port, database, option } = req.body;
+  setTimeout(() => {
+    if (res.locals.isres == true) return
+    res.locals.isres = true
+    res.status(200)
+    res.send({ message: 'fail' })
+    return
+  }, 10000)
   dbcon(host, username, password, port, database).connect((err) => {
     if (err) {
+      if (res.locals.isres == true) return
+      res.locals.isres = true
       res.status(200)
       res.send({ message: 'fail' })
       return
     }
+    if (res.locals.isres == true) return
+    res.locals.isres = true
     res.status(200)
     res.send({ message: 'ok' })
   });
