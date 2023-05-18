@@ -579,7 +579,7 @@ router.post('/dbtest', (req, res, next) => {
     res.status(200)
     res.send({ message: 'fail' })
     return
-  }, 10000)
+  }, 8000)
   dbcon(host, username, password, port, database).connect((err) => {
     if (err) {
       if (res.locals.isres == true) return
